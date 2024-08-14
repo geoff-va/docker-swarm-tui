@@ -1,0 +1,44 @@
+#left {
+	min-width: 30;
+	max-width: 40;
+}
+
+Info {
+	border: round $primary;
+}
+
+Info:focus-within {
+	border: round $secondary;
+}
+
+Stacks {
+	height: 10;
+	border: round $primary;
+	overflow-y: auto;
+}
+
+Stacks:focus-within {
+	border: round $secondary;
+}
+
+Secrets {
+	height: 10;
+	border: round $primary;
+}
+
+Secrets:focus-within {
+	border: round $secondary;
+}
+
+Config {
+	height: 10;
+	border: round $primary;
+}
+
+Config:focus-within {
+	border: round $secondary;
+}
+
+Tree {
+	height: auto;
+}
