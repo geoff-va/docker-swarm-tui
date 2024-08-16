@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from textual.binding import Binding
 from textual.message import Message
 from textual.widgets import DataTable
@@ -8,9 +10,9 @@ from .filter import DtFilter, StartFiltering, StopFiltering
 
 
 class SelectionChanged(Message):
-    def __init__(self, control_id: str, row_key: str) -> None:
+    def __init__(self, control_id: str, selected_id: str) -> None:
         self.control_id = control_id
-        self.row_key = row_key
+        self.selected_id = selected_id
         super().__init__()
 
 

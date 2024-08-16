@@ -4,7 +4,8 @@ from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import ContentSwitcher, Footer, Header
 
-from swarm_tui.components.config import Config, ConfigInfo, SelectionChanged
+from swarm_tui.components.config import Config, ConfigInfo
+from swarm_tui.components.datatable_nav import SelectionChanged
 from swarm_tui.components.nodes import NodeInfo, Nodes
 from swarm_tui.components.secrets import Secrets, SecretsInfo
 from swarm_tui.components.stacks import StackInfo, Stacks
@@ -39,6 +40,7 @@ class SwarmTui(App):
 
     def on_selection_changed(self, message: SelectionChanged):
         self.query_one("#info-pane", ContentSwitcher).current = message.control_id
+        self.log.info(f"{message.selected_id.value=}")
 
 
 def tui():

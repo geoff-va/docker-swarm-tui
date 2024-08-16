@@ -2,9 +2,10 @@ from textual.app import ComposeResult
 from textual.widgets import Pretty, Static, TabbedContent
 
 from .datatable_nav import DataTableNav, SelectionChanged
+from .navigable_panel import NavigablePanel
 
 
-class Secrets(Static):
+class Secrets(NavigablePanel):
     BORDER_TITLE = "Secrets"
 
     BINDINGS = [
@@ -13,21 +14,12 @@ class Secrets(Static):
         ("r", "rename", "Rename"),
     ]
 
-    def __init__(self, num: int, control_id: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self._control_id = control_id
-        self.border_title = f"[{num}] {self.BORDER_TITLE}"
-
     def compose(self) -> ComposeResult:
         self.table = DataTableNav(id="secrets-dt", filter_field="Name")
         self.table.add_column("Name", key="Name")
-        self.table.add_rows([["Secret 1"], ["Secret 2"]])
+        self.table.add_row("secret 1", key="secret 1")
+        self.table.add_row("secret 2", key="secret 2")
         yield self.table
-
-    def on_data_table_row_selected(self, message):
-        self.post_message(
-            SelectionChanged(control_id=self._control_id, row_key=message.row_key)
-        )
 
 
 class SecretsInfo(Static):
