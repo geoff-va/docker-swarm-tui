@@ -6,6 +6,7 @@ from textual.widgets import ContentSwitcher, Footer, Header
 
 from swarm_tui.components.config import Config, ConfigInfo
 from swarm_tui.components.datatable_nav import SelectionChanged
+from swarm_tui.components.docker_info import DockerInfo
 from swarm_tui.components.nodes import NodeInfo, Nodes
 from swarm_tui.components.secrets import Secrets, SecretsInfo
 from swarm_tui.components.stacks import StackInfo, Stacks
@@ -31,7 +32,9 @@ class SwarmTui(App):
                 yield Secrets(3, "secrets-info")
                 yield Nodes(4, "node-info")
             with Vertical(id="right"):
-                with ContentSwitcher(id="info-pane", initial="stack-info"):
+                # FIX: Create some kind of default panel that shows defaul info
+                with ContentSwitcher(id="info-pane", initial="docker-info"):
+                    yield DockerInfo(id="docker-info")
                     yield StackInfo(id="stack-info")
                     yield ConfigInfo(id="config-info")
                     yield SecretsInfo(id="secrets-info")
