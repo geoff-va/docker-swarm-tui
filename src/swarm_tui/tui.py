@@ -1,17 +1,13 @@
-from __future__ import annotations
-
 import logging
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Footer, Header
+from textual.widgets import ContentSwitcher, Footer, Header
 
-from swarm_tui.components.config import Config
-from swarm_tui.components.info import Info
-from swarm_tui.components.secrets import Secrets
-from swarm_tui.components.services import Services
-from swarm_tui.components.stacks import Stacks
-from swarm_tui.components.tasks import Tasks
+from swarm_tui.components.config import Config, ConfigInfo, SelectionChanged
+from swarm_tui.components.nodes import NodeInfo, Nodes
+from swarm_tui.components.secrets import Secrets, SecretsInfo
+from swarm_tui.components.stacks import StackInfo, Stacks
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +16,6 @@ class SwarmTui(App):
     """A TUI interface for swram management"""
 
     AUTO_FOCUS = ""
-
     CSS_PATH = "./tui.tcss"
     BINDINGS = [
         ("q", "quit", "Quit"),
@@ -30,12 +25,20 @@ class SwarmTui(App):
         yield Header()
         with Horizontal():
             with Vertical(id="left"):
-                yield Stacks()
-                yield Config()
-                yield Secrets()
+                yield Stacks(1)
+                yield Config(2, "config-info")
+                yield Secrets(3, "secrets-info")
+                yield Nodes(4, "node-info")
             with Vertical(id="right"):
-                yield Info()
+                with ContentSwitcher(id="info-pane", initial="stack-info"):
+                    yield StackInfo(id="stack-info")
+                    yield ConfigInfo(id="config-info")
+                    yield SecretsInfo(id="secrets-info")
+                    yield NodeInfo(id="node-info")
         yield Footer()
+
+    def on_selection_changed(self, message: SelectionChanged):
+        self.query_one("#info-pane", ContentSwitcher).current = message.control_id
 
 
 def tui():

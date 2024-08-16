@@ -1,9 +1,17 @@
 from __future__ import annotations
 
 from textual.binding import Binding
+from textual.message import Message
 from textual.widgets import DataTable
 
 from .filter import DtFilter, StartFiltering, StopFiltering
+
+
+class SelectionChanged(Message):
+    def __init__(self, control_id: str, row_key: str) -> None:
+        self.control_id = control_id
+        self.row_key = row_key
+        super().__init__()
 
 
 class DataTableNav(DataTable):
@@ -19,9 +27,18 @@ class DataTableNav(DataTable):
     ]
     filter_class = DtFilter
 
-    def __init__(self, filter_field: str = "", *args, **kwargs) -> None:
+    def __init__(
+        self,
+        filter_field: str = "",
+        hide_cursor_on_focus_change: bool = True,
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self._filter_field = filter_field
+        self._hide_cursor_on_focus_change = hide_cursor_on_focus_change
+        if hide_cursor_on_focus_change:
+            self.cursor_type = "none"
 
     def action_start_filtering(self) -> None:
         """Start Filtering"""
@@ -42,3 +59,11 @@ class DataTableNav(DataTable):
 
     def clear_filter(self) -> None:
         self._filter.clear_filter()
+
+    def on_focus(self) -> None:
+        if self._hide_cursor_on_focus_change:
+            self.cursor_type = "row"
+
+    def on_blur(self) -> None:
+        if self._hide_cursor_on_focus_change:
+            self.cursor_type = "none"
