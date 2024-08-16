@@ -5,7 +5,13 @@ from .datatable_nav import DataTableNav
 
 
 class Stacks(Static):
-    BORDER_TITLE = "Stacks"
+    """Stacks and Services Panel
+
+    - Stacks have a special prefix/icon
+    - Services have a different one
+    """
+
+    BORDER_TITLE = "Stacks and Services"
 
     BINDINGS = [
         ("e", "expand", "Expand All"),
@@ -17,25 +23,24 @@ class Stacks(Static):
         self.border_title = f"[{num}] {self.BORDER_TITLE}"
 
     def compose(self) -> ComposeResult:
-        tree1: Tree[dict] = Tree("ibl-dm-pro (2)")
-        tree1.root.expand()
-        db = tree1.root.add("db (1/1)")
+        tree: Tree[dict] = Tree("Stacks")
+        tree.guide_depth = 3
+        tree.show_root = False
+        stack1 = tree.root.add("ibl-dm-pro (2)")
+        db = stack1.add("db (1/1)")
         db.add_leaf("db.1")
-        web = tree1.root.add("web (3/3)", expand=True)
+        web = stack1.add("web (3/3)")
         web.add_leaf("web.1")
         web.add_leaf("web.2")
         web.add_leaf("web.3")
-        yield tree1
 
-        tree2: Tree[dict] = Tree("--")
-        tree2.root.expand()
-        db2 = tree2.root.add("db (1/1)")
-        db2.add_leaf("db.1")
-        web = tree2.root.add("web (3/3)", expand=True)
-        web.add_leaf("service.1")
-        web.add_leaf("service.2")
-        web.add_leaf("service.3")
-        yield tree2
+        stack2 = tree.root.add("other-stack (1)")
+        service = stack2.add("service (1/1)")
+        service.add_leaf("service.1")
+
+        unbound = tree.root.add("service (1/1)")
+        unbound.add_leaf("service.1")
+        yield tree
 
 
 class StackInfo(Static):

@@ -1,20 +1,16 @@
 #left {
 	min-width: 30;
 	max-width: 40;
+	width: 1fr;
 }
 
-/*
-Info {
-	border: round $primary;
+#right {
+	min-width: 30;
+	width: 2fr;
 }
-
-Info:focus-within {
-	border: round $secondary;
-}
-*/
 
 Stacks {
-	height: 10;
+	height: 1fr;
 	border: round $primary;
 	overflow-y: auto;
 }
@@ -23,33 +19,16 @@ Stacks:focus-within {
 	border: round $secondary;
 }
 
-Nodes {
-	height: 10;
+NavigablePanel {
+	height: 1fr;
 	border: round $primary;
 	overflow-y: auto;
 }
 
-Nodes:focus-within {
+NavigablePanel:focus-within {
 	border: round $secondary;
 }
 
-Secrets {
-	height: 10;
-	border: round $primary;
-}
-
-Secrets:focus-within {
-	border: round $secondary;
-}
-
-Config {
-	height: 10;
-	border: round $primary;
-}
-
-Config:focus-within {
-	border: round $secondary;
-}
 
 Tree {
 	height: auto;
@@ -67,4 +46,9 @@ TabbedContent TextArea {
 	margin: 0;
 	padding: 0;
 	border: none;
+
+}
+
+ContentSwitcher {
+	height: 1fr;
 }
