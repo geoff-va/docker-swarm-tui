@@ -67,9 +67,8 @@ class SwarmTui(App):
 
     @work
     async def load_stacks_and_services(self) -> None:
-        stacks, services = await self.backend.get_stacks_and_services()
-        self.query_one(Stacks).stacks = stacks
-        self.query_one(Stacks).services = services
+        stacks_and_services = await self.backend.get_stacks_and_services()
+        self.query_one(Stacks).stacks_and_services = stacks_and_services
 
     async def on_selection_changed(self, message: SelectionChanged):
         info = self.query_one(f"#{message.control_id}")

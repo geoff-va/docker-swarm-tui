@@ -21,18 +21,22 @@ class Node:
     server: str
 
 
+class DockerNode:
+    pass
+
+
 @dataclass
-class Task:
+class Task(DockerNode):
     name: str
 
 
 @dataclass
-class Service:
+class Service(DockerNode):
     name: str
     tasks: list[Task]
 
 
 @dataclass
-class Stack:
+class Stack(DockerNode):
     name: str
     services: list[Service]

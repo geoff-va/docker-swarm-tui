@@ -21,41 +21,38 @@ class Stacks(Static):
         ("c", "collapse", "Collapse All"),
     ]
 
-    stacks: reactive[list[models.Stack]] = reactive([])
-    services: reactive[list[models.Service]] = reactive([])
+    stacks_and_services: reactive[tuple[list[models.Stack], list[models.Service]]] = (
+        reactive(([], []))
+    )
 
     def __init__(self, num: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.border_title = f"[{num}] {self.BORDER_TITLE}"
 
     def compose(self) -> ComposeResult:
-        self.stack_tree: Tree[dict] = Tree("Stacks")
+        self.stack_tree: Tree[models.DockerNode] = Tree("Stacks")
         self.stack_tree.guide_depth = 3
         self.stack_tree.show_root = False
         yield self.stack_tree
 
-        self.service_tree: Tree[dict] = Tree("Unbound Services")
-        self.service_tree.guide_depth = 3
-        self.service_tree.show_root = False
-        yield self.service_tree
-
-    def watch_stacks(self, stacks: list[models.Stack]) -> None:
+    def watch_stacks_and_services(
+        self, stacks_and_services: tuple[list[models.Stack], list[models.Service]]
+    ) -> None:
+        stacks, services = stacks_and_services
         self.stack_tree.clear()
         for stack in stacks:
             stack_node = self.stack_tree.root.add(
-                f"{stack.name} ({len(stack.services)})"
+                f"📚 {stack.name} ({len(stack.services)})", data=stack
             )
             for service in stack.services:
-                service_node = stack_node.add(service.name)
+                service_node = stack_node.add(f"⍾ {service.name}", data=service)
                 for task in service.tasks:
-                    service_node.add_leaf(task.name)
+                    service_node.add_leaf(task.name, data=task)
 
-    def watch_services(self, services: list[models.Service]) -> None:
-        self.service_tree.clear()
         for service in services:
-            service_node = self.service_tree.root.add(service.name)
+            service_node = self.stack_tree.root.add(f"⍾ {service.name}", data=service)
             for task in service.tasks:
-                service_node.add_leaf(task.name)
+                service_node.add_leaf(task.name, data=task)
 
 
 class StackInfo(Static):
