@@ -4,7 +4,7 @@ from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Pretty, Static, TabbedContent
 
-from .datatable_nav import DataTableNav, SelectionChanged
+from .datatable_nav import DataTableNav
 from .navigable_panel import NavigablePanel
 
 
@@ -24,10 +24,10 @@ class Secrets(NavigablePanel):
         self.table.add_column("Name", key="Name")
         yield self.table
 
-    def watch_data(self, secrets: list[str]) -> None:
+    def watch_data(self, rows: list[str]) -> None:
         self.table.clear()
-        for secret in secrets:
-            self.table.add_row(secret, key=secret)
+        for row in rows:
+            self.table.add_row(row, key=row)
         self.table.sort("Name", key=lambda x: x.lower())
 
 

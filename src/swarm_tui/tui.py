@@ -49,10 +49,15 @@ class SwarmTui(App):
 
     def on_mount(self) -> None:
         self.load_secrets()
+        self.load_nodes()
 
     @work
     async def load_secrets(self) -> None:
         self.query_one(Secrets).data = await self.backend.get_secrets()
+
+    @work
+    async def load_nodes(self) -> None:
+        self.query_one(Nodes).data = await self.backend.get_nodes()
 
     def on_selection_changed(self, message: SelectionChanged):
         self.query_one("#info-pane", ContentSwitcher).current = message.control_id

@@ -32,8 +32,13 @@ class FakeBackend(BaseBackend):
         },
     }
 
+    NODES = {"manager 1": {}, "worker 1": {}}
+
     async def get_secrets(self) -> list[str]:
         return sorted(list(self.SECRETS.keys()))
 
     async def get_secret_info(self, secret_id: str) -> dict[str, Any]:
         return self.SECRETS[secret_id]
+
+    async def get_nodes(self) -> list[str]:
+        return sorted(list(self.NODES.keys()))
