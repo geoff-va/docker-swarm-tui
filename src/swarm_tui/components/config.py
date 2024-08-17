@@ -4,6 +4,7 @@ from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Pretty, Static, TabbedContent, TextArea
 
+from ..backends.base import BaseBackend
 from .datatable_nav import DataTableNav
 from .navigable_panel import NavigablePanel
 
@@ -43,8 +44,18 @@ class ConfigInfo(Static):
         ("f", "fullscreen", "Toggle Fullscreen"),
     ]
 
+    selected: reactive[str | None] = reactive(None)
+
+    def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.backend = backend
+
     def compose(self) -> ComposeResult:
-        with TabbedContent("Info", "Config") as tc:
-            tc.border_title = "Config Info"
-            yield TextArea("Info")
-            yield Pretty({"key": "value"})
+        self.component = Pretty({})
+        with TabbedContent("Info"):
+            yield self.component
+
+    async def watch_selected(self, selected: str) -> None:
+        self.query_one(TabbedContent).border_title = f"Secret: {selected}"
+        info = await self.backend.get_config_info(selected)
+        self.component.update(info)

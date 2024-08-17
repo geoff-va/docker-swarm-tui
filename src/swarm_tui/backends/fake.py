@@ -34,7 +34,11 @@ class FakeBackend(BaseBackend):
     }
 
     NODES = {"manager 1": {}, "worker 1": {}}
-    CONFIGS = {"config 1": {}, "config 2": {}, "config 3": {}}
+    CONFIGS = {
+        "config 1": {"heres": {"some": "nested"}, "keys": "!!!"},
+        "config 2": {"a": "b"},
+        "config 3": {"c": "d", "e": "f"},
+    }
     STACKS = [
         models.Stack(
             "stack 1",
@@ -81,6 +85,9 @@ class FakeBackend(BaseBackend):
 
     async def get_configs(self) -> list[str]:
         return sorted(list(self.CONFIGS.keys()))
+
+    async def get_config_info(self, config_id: str) -> dict[str, Any]:
+        return self.CONFIGS.get(config_id, {})
 
     async def get_stacks_and_services(
         self,

@@ -38,7 +38,7 @@ class SecretsInfo(Static):
         ("f", "fullscreen", "Toggle Fullscreen"),
     ]
 
-    selected_secret: reactive[str | None] = reactive(None)
+    selected: reactive[str | None] = reactive(None)
 
     def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -49,7 +49,7 @@ class SecretsInfo(Static):
         with TabbedContent("Info"):
             yield self.component
 
-    async def watch_selected_secret(self, selected_secret: str) -> None:
-        self.query_one(TabbedContent).border_title = f"Secret: {selected_secret}"
-        info = await self.backend.get_secret_info(selected_secret)
+    async def watch_selected(self, selected: str) -> None:
+        self.query_one(TabbedContent).border_title = f"Secret: {selected}"
+        info = await self.backend.get_secret_info(selected)
         self.component.update(info)
