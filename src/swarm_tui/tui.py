@@ -1,9 +1,12 @@
 import logging
 
+from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import ContentSwitcher, Footer, Header
 
+from swarm_tui.backends.base import BaseBackend
+from swarm_tui.backends.fake import FakeBackend
 from swarm_tui.components.config import Config, ConfigInfo
 from swarm_tui.components.datatable_nav import SelectionChanged
 from swarm_tui.components.docker_info import DockerInfo
@@ -23,6 +26,10 @@ class SwarmTui(App):
         ("q", "quit", "Quit"),
     ]
 
+    def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.backend = backend
+
     def compose(self) -> ComposeResult:
         yield Header()
         with Horizontal():
@@ -32,7 +39,6 @@ class SwarmTui(App):
                 yield Secrets(3, "secrets-info")
                 yield Nodes(4, "node-info")
             with Vertical(id="right"):
-                # FIX: Create some kind of default panel that shows defaul info
                 with ContentSwitcher(id="info-pane", initial="docker-info"):
                     yield DockerInfo(id="docker-info")
                     yield StackInfo(id="stack-info")
@@ -41,13 +47,21 @@ class SwarmTui(App):
                     yield NodeInfo(id="node-info")
         yield Footer()
 
+    def on_mount(self) -> None:
+        self.load_secrets()
+
+    @work
+    async def load_secrets(self) -> None:
+        self.query_one(Secrets).data = await self.backend.get_secrets()
+
     def on_selection_changed(self, message: SelectionChanged):
         self.query_one("#info-pane", ContentSwitcher).current = message.control_id
         self.log.info(f"{message.selected_id.value=}")
 
 
 def tui():
-    app = SwarmTui()
+    backend = FakeBackend()
+    app = SwarmTui(backend)
     app.run()
 
 
