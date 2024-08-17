@@ -6,6 +6,7 @@ from textual.widgets import Pretty, Static, TabbedContent
 
 from ..backends.base import BaseBackend
 from .datatable_nav import DataTableNav
+from .info_panel import InfoPanel
 from .navigable_panel import NavigablePanel
 
 
@@ -33,16 +34,10 @@ class Secrets(NavigablePanel):
         self.table.sort("Name", key=lambda x: x.lower())
 
 
-class SecretsInfo(Static):
+class SecretsInfo(InfoPanel):
     BINDINGS = [
         ("f", "fullscreen", "Toggle Fullscreen"),
     ]
-
-    selected: reactive[str | None] = reactive(None)
-
-    def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.backend = backend
 
     def compose(self) -> ComposeResult:
         self.component = Pretty({})
