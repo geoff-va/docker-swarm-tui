@@ -22,8 +22,3 @@ class InfoPanel(Static):
         self.component = Pretty({})
         with TabbedContent("Info"):
             yield self.component
-
-    async def watch_selected(self, selected: str) -> None:
-        self.query_one(TabbedContent).border_title = f"Secret: {selected}"
-        info = await self.backend.get_secret_info(selected)
-        self.component.update(info)
