@@ -4,6 +4,7 @@ from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Pretty, Static, TabbedContent
 
+from ..backends.base import BaseBackend
 from .datatable_nav import DataTableNav
 from .navigable_panel import NavigablePanel
 
@@ -37,8 +38,18 @@ class SecretsInfo(Static):
         ("f", "fullscreen", "Toggle Fullscreen"),
     ]
 
+    selected_secret: reactive[str | None] = reactive(None)
+
+    def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.backend = backend
+
     def compose(self) -> ComposeResult:
-        with TabbedContent("Page 1", "Page 2") as tc:
-            tc.border_title = "Secrets Info"
-            yield Pretty({"Info": "Content"})
-            yield Pretty({"Secret": "Content"})
+        self.component = Pretty({})
+        with TabbedContent("Info"):
+            yield self.component
+
+    async def watch_selected_secret(self, selected_secret: str) -> None:
+        self.query_one(TabbedContent).border_title = f"Secret: {selected_secret}"
+        info = await self.backend.get_secret_info(selected_secret)
+        self.component.update(info)

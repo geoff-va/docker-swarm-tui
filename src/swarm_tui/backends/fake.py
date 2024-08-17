@@ -74,7 +74,7 @@ class FakeBackend(BaseBackend):
         return sorted(list(self.SECRETS.keys()))
 
     async def get_secret_info(self, secret_id: str) -> dict[str, Any]:
-        return self.SECRETS[secret_id]
+        return self.SECRETS.get(secret_id, {})
 
     async def get_nodes(self) -> list[str]:
         return sorted(list(self.NODES.keys()))
