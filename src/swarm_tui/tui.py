@@ -44,7 +44,7 @@ class SwarmTui(App):
                     yield StackInfo(id="stack-info")
                     yield ConfigInfo(self.backend, id="config-info")
                     yield SecretsInfo(self.backend, id="secrets-info")
-                    yield NodeInfo(id="node-info")
+                    yield NodeInfo(self.backend, id="node-info")
         yield Footer()
 
     def on_mount(self) -> None:

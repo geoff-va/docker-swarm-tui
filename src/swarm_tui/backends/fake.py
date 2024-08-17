@@ -33,7 +33,53 @@ class FakeBackend(BaseBackend):
         },
     }
 
-    NODES = {"manager 1": {}, "worker 1": {}}
+    NODES = {
+        "manager 1": {
+            "ID": "7yzl92x79aoyfc2sjpnr8wfsn",
+            "Version": {"Index": 15996},
+            "CreatedAt": "2024-03-19T21:12:44.287483594Z",
+            "UpdatedAt": "2024-08-17T06:14:52.975264179Z",
+            "Spec": {"Labels": {}, "Role": "manager", "Availability": "active"},
+            "Description": {
+                "Hostname": "docker-desktop",
+                "Platform": {"Architecture": "aarch64", "OS": "linux"},
+                "Resources": {"NanoCPUs": 8000000000, "MemoryBytes": 8222203904},
+                "Engine": {
+                    "EngineVersion": "25.0.3",
+                    "Plugins": [
+                        {"Type": "Log", "Name": "awslogs"},
+                        {"Type": "Log", "Name": "fluentd"},
+                        {"Type": "Log", "Name": "gcplogs"},
+                        {"Type": "Log", "Name": "gelf"},
+                        {"Type": "Log", "Name": "journald"},
+                        {"Type": "Log", "Name": "json-file"},
+                        {"Type": "Log", "Name": "local"},
+                        {"Type": "Log", "Name": "splunk"},
+                        {"Type": "Log", "Name": "syslog"},
+                        {"Type": "Network", "Name": "bridge"},
+                        {"Type": "Network", "Name": "host"},
+                        {"Type": "Network", "Name": "ipvlan"},
+                        {"Type": "Network", "Name": "macvlan"},
+                        {"Type": "Network", "Name": "null"},
+                        {"Type": "Network", "Name": "overlay"},
+                        {"Type": "Volume", "Name": "local"},
+                    ],
+                },
+                "TLSInfo": {
+                    "TrustRoot": "-----BEGIN CERTIFICATE-----\nMIIBajCCARCgAwIBAgIUA2/2id0OMJZLuhQoVbjvCgYIKoZIzj0EAwIw\nEzERMA8GA1UEAxMIc3dhcm0tY2EwHhcNMjQwMzE5MjEwODAwWhcNNDQwMzE0MjEw\nODAwWjATMREwDwYDVQQDEwhzd2FybS1jYTBZMBMGByqGSM49AgEGCCqGSM49AwEH\nA0IABH+gbdj92lJBxErHquMvLjsBUd/W03u/HGsu3K8d4nO1hoZO+SUrO7dkyC1F\nUnCaUd5mw4RAlnKx3ioR0PqmfFyjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMB\nAf8EBTADAQH/MB0GA1UdDgQWBBTCw7enWgmQUcsVLQMGae8UuqRiYjAKBggqhkjO\nPQQDAgNIADBFAiADn5XfGji8NA1qZa2PVoq23L/8qIrfC7FvyT2VQB3WKAIhALA2\nJffrJOb6SzasmrQLEFTjlllo9QaPfJpqYIDfT+E7\n-----END CERTIFICATE-----\n",
+                    "CertIssuerSubject": "MBMxETAPBgNVBAMTCHN3YXJtLh",
+                    "CertIssuerPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZQcDQgAEf6Bt2P3aUkHESseq4y8uOwFR39bTe78cay7crx3ic7WGhk75JSs7t2TILUVScJpR3mbDhECWcrHeKhHQ+qZ8XA==",
+                },
+            },
+            "Status": {"State": "ready", "Addr": "192.168.65.3"},
+            "ManagerStatus": {
+                "Leader": True,
+                "Reachability": "reachable",
+                "Addr": "192.168.65.3:2377",
+            },
+        },
+        "worker 1": {"other": "stuff..."},
+    }
     CONFIGS = {
         "config 1": {"heres": {"some": "nested"}, "keys": "!!!"},
         "config 2": {"a": "b"},
@@ -82,6 +128,9 @@ class FakeBackend(BaseBackend):
 
     async def get_nodes(self) -> list[str]:
         return sorted(list(self.NODES.keys()))
+
+    async def get_node_info(self, node_id: str) -> dict[str, Any]:
+        return self.NODES.get(node_id, {})
 
     async def get_configs(self) -> list[str]:
         return sorted(list(self.CONFIGS.keys()))
