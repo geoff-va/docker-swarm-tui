@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rich.text import Text
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import RichLog, Static, TabbedContent, TextArea, Tree
@@ -40,6 +41,11 @@ class Stacks(Static):
     ) -> None:
         stacks, services = stacks_and_services
         self.stack_tree.clear()
+        # TODO: See if we can make "headers" so they aren't selectable
+        if stacks:
+            self.stack_tree.root.add(
+                Text("-- Stack Services --", style="bold cyan"), allow_expand=False
+            )
         for stack in stacks:
             stack_node = self.stack_tree.root.add(
                 f"📚 {stack.name} ({len(stack.services)})", data=stack
@@ -48,6 +54,11 @@ class Stacks(Static):
                 service_node = stack_node.add(f"⍾ {service.name}", data=service)
                 for task in service.tasks:
                     service_node.add_leaf(task.name, data=task)
+
+        if services:
+            self.stack_tree.root.add(
+                Text("-- Non-Stack Services --", style="bold cyan"), allow_expand=False
+            )
 
         for service in services:
             service_node = self.stack_tree.root.add(f"⍾ {service.name}", data=service)
