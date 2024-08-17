@@ -22,6 +22,7 @@ class Config(NavigablePanel):
     def compose(self) -> ComposeResult:
         self.table = DataTableNav(id="config-dt", filter_field="Name")
         self.table.cursor_type = "none"
+        self.table.show_header = False
         self.table.add_column("Name", key="Name")
         for row in range(2):
             self.table.add_row(f"Config {row}", key=f"Config {row}")

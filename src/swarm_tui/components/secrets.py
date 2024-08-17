@@ -21,6 +21,7 @@ class Secrets(NavigablePanel):
 
     def compose(self) -> ComposeResult:
         self.table = DataTableNav(id="secrets-dt", filter_field="Name")
+        self.table.show_header = False
         self.table.add_column("Name", key="Name")
         yield self.table
 
