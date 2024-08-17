@@ -9,6 +9,20 @@ from .base import BaseBackend
 class FakeBackend(BaseBackend):
     """A backend producing some fake data"""
 
+    STACK_INFO: dict[str, Any] = {"stack 1": "Stack 1 Info", "stack 2": "Stack 2 Info"}
+    SERVICE_INFO: dict[str, Any] = {
+        "service 1": "Service 1 Info",
+        "service 2": "Service 2 Info",
+        "service 3": "Service 3 Info",
+        "service 4": "Service 3 Info",
+    }
+    TASK_INFO: dict[str, Any] = {
+        "task.1": "Task 1 Info",
+        "task.2": "Task 2 Info",
+        "task.3": "Task 3 Info",
+        "task.4": "Task 4 Info",
+    }
+
     SECRETS = {
         "short": {
             "ID": "lps6ujo3s56qewv4uz4cbprm5",
@@ -129,8 +143,15 @@ class FakeBackend(BaseBackend):
     async def get_nodes(self) -> list[str]:
         return sorted(list(self.NODES.keys()))
 
-    async def get_node_info(self, node_id: str) -> dict[str, Any]:
-        return self.NODES.get(node_id, {})
+    async def get_node_info(
+        self, node_id: str, node_type: models.DockerNodeType
+    ) -> dict[str, Any]:
+        if node_type == models.DockerNodeType.STACK:
+            return self.STACK_INFO.get(node_id, "")
+        if node_type == models.DockerNodeType.SERVICE:
+            return self.SERVICE_INFO.get(node_id, "")
+        if node_type == models.DockerNodeType.TASK:
+            return self.TASK_INFO.get(node_id, "")
 
     async def get_configs(self) -> list[str]:
         return sorted(list(self.CONFIGS.keys()))

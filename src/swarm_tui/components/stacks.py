@@ -83,15 +83,17 @@ class StackInfo(InfoPanel):
     ]
 
     def compose(self) -> ComposeResult:
-        self.component = Pretty({})
+        self.component = Pretty("(Don't look at me)")
         self.docker_log = RichLog()
         with TabbedContent("Info", "Logs"):
             yield self.component
             yield self.docker_log
 
     async def watch_selected(self, selected: SelectedContent) -> None:
-        if not selected:
+        if not selected or selected.data is None:
             return
-        self.query_one(TabbedContent).border_title = f"Entity: {selected.selected_id}"
-        info = await self.backend.get_config_info(selected.selected_id)
+        self.query_one(TabbedContent).border_title = f"Entity: {selected.data.name}"
+        info = await self.backend.get_node_info(
+            selected.data.name, node_type=selected.data.node_type
+        )
         self.component.update(info)
