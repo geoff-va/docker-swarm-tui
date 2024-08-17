@@ -51,6 +51,7 @@ class SwarmTui(App):
         self.load_secrets()
         self.load_nodes()
         self.load_configs()
+        self.load_stacks_and_services()
 
     @work
     async def load_secrets(self) -> None:
@@ -63,6 +64,12 @@ class SwarmTui(App):
     @work
     async def load_configs(self) -> None:
         self.query_one(Config).data = await self.backend.get_configs()
+
+    @work
+    async def load_stacks_and_services(self) -> None:
+        stacks, services = await self.backend.get_stacks_and_services()
+        self.query_one(Stacks).stacks = stacks
+        self.query_one(Stacks).services = services
 
     def on_selection_changed(self, message: SelectionChanged):
         self.query_one("#info-pane", ContentSwitcher).current = message.control_id

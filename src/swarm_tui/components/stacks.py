@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from textual.app import ComposeResult
+from textual.reactive import reactive
 from textual.widgets import RichLog, Static, TabbedContent, TextArea, Tree
 
-from .datatable_nav import DataTableNav
+from ..backends import models
 
 
 class Stacks(Static):
@@ -18,29 +21,41 @@ class Stacks(Static):
         ("c", "collapse", "Collapse All"),
     ]
 
+    stacks: reactive[list[models.Stack]] = reactive([])
+    services: reactive[list[models.Service]] = reactive([])
+
     def __init__(self, num: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.border_title = f"[{num}] {self.BORDER_TITLE}"
 
     def compose(self) -> ComposeResult:
-        tree: Tree[dict] = Tree("Stacks")
-        tree.guide_depth = 3
-        tree.show_root = False
-        stack1 = tree.root.add("ibl-dm-pro (2)")
-        db = stack1.add("db (1/1)")
-        db.add_leaf("db.1")
-        web = stack1.add("web (3/3)")
-        web.add_leaf("web.1")
-        web.add_leaf("web.2")
-        web.add_leaf("web.3")
+        self.stack_tree: Tree[dict] = Tree("Stacks")
+        self.stack_tree.guide_depth = 3
+        self.stack_tree.show_root = False
+        yield self.stack_tree
 
-        stack2 = tree.root.add("other-stack (1)")
-        service = stack2.add("service (1/1)")
-        service.add_leaf("service.1")
+        self.service_tree: Tree[dict] = Tree("Unbound Services")
+        self.service_tree.guide_depth = 3
+        self.service_tree.show_root = False
+        yield self.service_tree
 
-        unbound = tree.root.add("service (1/1)")
-        unbound.add_leaf("service.1")
-        yield tree
+    def watch_stacks(self, stacks: list[models.Stack]) -> None:
+        self.stack_tree.clear()
+        for stack in stacks:
+            stack_node = self.stack_tree.root.add(
+                f"{stack.name} ({len(stack.services)})"
+            )
+            for service in stack.services:
+                service_node = stack_node.add(service.name)
+                for task in service.tasks:
+                    service_node.add_leaf(task.name)
+
+    def watch_services(self, services: list[models.Service]) -> None:
+        self.service_tree.clear()
+        for service in services:
+            service_node = self.service_tree.root.add(service.name)
+            for task in service.tasks:
+                service_node.add_leaf(task.name)
 
 
 class StackInfo(Static):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from . import models
 from .base import BaseBackend
 
 
@@ -33,8 +34,41 @@ class FakeBackend(BaseBackend):
     }
 
     NODES = {"manager 1": {}, "worker 1": {}}
-
     CONFIGS = {"config 1": {}, "config 2": {}, "config 3": {}}
+    STACKS = [
+        models.Stack(
+            "stack 1",
+            services=[
+                models.Service(
+                    "service 1",
+                    tasks=[models.Task("task.1"), models.Task("task.2")],
+                ),
+                models.Service(
+                    "service 2",
+                    tasks=[models.Task("task.1"), models.Task("task.2")],
+                ),
+            ],
+        ),
+        models.Stack(
+            "stack 2",
+            services=[
+                models.Service(
+                    "service 1",
+                    tasks=[models.Task("task.1"), models.Task("task.2")],
+                )
+            ],
+        ),
+    ]
+    SERVICES = [
+        models.Service(
+            "service 3",
+            tasks=[models.Task("task.1"), models.Task("task.2")],
+        ),
+        models.Service(
+            "service 4",
+            tasks=[models.Task("task.1"), models.Task("task.2"), models.Task("task.3")],
+        ),
+    ]
 
     async def get_secrets(self) -> list[str]:
         return sorted(list(self.SECRETS.keys()))
@@ -47,3 +81,8 @@ class FakeBackend(BaseBackend):
 
     async def get_configs(self) -> list[str]:
         return sorted(list(self.CONFIGS.keys()))
+
+    async def get_stacks_and_services(
+        self,
+    ) -> tuple[list[models.Stack], list[models.Service]]:
+        return self.STACKS, self.SERVICES
