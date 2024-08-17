@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from textual.app import ComposeResult
 from textual.reactive import reactive
-from textual.widgets import Pretty, Static, TabbedContent, TextArea
+from textual.widgets import Pretty, TabbedContent
 
-from ..backends.base import BaseBackend
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
 from .navigable_panel import NavigablePanel
