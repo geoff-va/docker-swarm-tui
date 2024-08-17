@@ -17,5 +17,7 @@ class NavigablePanel(Static):
     # The data we pass is opaque and is will be forarded to the control
     def on_data_table_row_selected(self, message):
         self.post_message(
-            SelectionChanged(control_id=self._control_id, selected_id=message.row_key)
+            SelectionChanged(
+                control_id=self._control_id, selected_id=message.row_key.value
+            )
         )

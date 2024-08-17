@@ -7,12 +7,13 @@ from textual.message import Message
 from textual.widgets import DataTable
 
 from .filter import DtFilter, StartFiltering, StopFiltering
+from .models import SelectedContent
 
 
 class SelectionChanged(Message):
-    def __init__(self, control_id: str, selected_id: str) -> None:
+    def __init__(self, control_id: str, selected_id: str, data: Any = None) -> None:
         self.control_id = control_id
-        self.selected_id = selected_id
+        self.selected_content = SelectedContent(selected_id, data)
         super().__init__()
 
 

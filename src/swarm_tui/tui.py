@@ -34,14 +34,14 @@ class SwarmTui(App):
         yield Header()
         with Horizontal():
             with Vertical(id="left"):
-                yield Stacks(1)
+                yield Stacks(1, "stack-info")
                 yield Config(2, "config-info")
                 yield Secrets(3, "secrets-info")
                 yield Nodes(4, "node-info")
             with Vertical(id="right"):
                 with ContentSwitcher(id="info-pane", initial="docker-info"):
                     yield DockerInfo(id="docker-info")
-                    yield StackInfo(id="stack-info")
+                    yield StackInfo(self.backend, id="stack-info")
                     yield ConfigInfo(self.backend, id="config-info")
                     yield SecretsInfo(self.backend, id="secrets-info")
                     yield NodeInfo(self.backend, id="node-info")
@@ -72,9 +72,8 @@ class SwarmTui(App):
 
     async def on_selection_changed(self, message: SelectionChanged):
         info = self.query_one(f"#{message.control_id}")
-        info.selected = message.selected_id.value
+        info.selected = message.selected_content
         self.query_one("#info-pane", ContentSwitcher).current = message.control_id
-        self.log.info(f"{message.selected_id.value=}")
 
 
 def tui():

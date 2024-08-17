@@ -3,12 +3,16 @@ from __future__ import annotations
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.reactive import reactive
-from textual.widgets import RichLog, Static, TabbedContent, TextArea, Tree
+from textual.widgets import Pretty, RichLog, Static, TabbedContent, TextArea, Tree
 
 from ..backends import models
+from .datatable_nav import SelectionChanged
+from .info_panel import InfoPanel
+from .models import SelectedContent
+from .navigable_panel import NavigablePanel
 
 
-class Stacks(Static):
+class Stacks(NavigablePanel):
     """Stacks and Services Panel
 
     - Stacks have a special prefix/icon
@@ -25,10 +29,6 @@ class Stacks(Static):
     stacks_and_services: reactive[tuple[list[models.Stack], list[models.Service]]] = (
         reactive(([], []))
     )
-
-    def __init__(self, num: int, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.border_title = f"[{num}] {self.BORDER_TITLE}"
 
     def compose(self) -> ComposeResult:
         self.stack_tree: Tree[models.DockerNode] = Tree("Stacks")
@@ -65,8 +65,17 @@ class Stacks(Static):
             for task in service.tasks:
                 service_node.add_leaf(task.name, data=task)
 
+    def on_tree_node_selected(self, message: Tree.NodeSelected) -> None:
+        self.post_message(
+            SelectionChanged(
+                control_id=self._control_id,
+                selected_id=str(message.node.label),
+                data=message.node.data,
+            )
+        )
 
-class StackInfo(Static):
+
+class StackInfo(InfoPanel):
     BORDER_TITLE = "Stack Info"
 
     BINDINGS = [
@@ -74,7 +83,15 @@ class StackInfo(Static):
     ]
 
     def compose(self) -> ComposeResult:
-        with TabbedContent("Info", "Logs", "Volumes"):
-            yield TextArea("Content")
-            yield RichLog()
-            yield TextArea()
+        self.component = Pretty({})
+        self.docker_log = RichLog()
+        with TabbedContent("Info", "Logs"):
+            yield self.component
+            yield self.docker_log
+
+    async def watch_selected(self, selected: SelectedContent) -> None:
+        if not selected:
+            return
+        self.query_one(TabbedContent).border_title = f"Entity: {selected.selected_id}"
+        info = await self.backend.get_config_info(selected.selected_id)
+        self.component.update(info)

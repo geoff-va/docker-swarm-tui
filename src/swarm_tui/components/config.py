@@ -6,6 +6,7 @@ from textual.widgets import Pretty, TabbedContent
 
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
+from .models import SelectedContent
 from .navigable_panel import NavigablePanel
 
 
@@ -47,7 +48,9 @@ class ConfigInfo(InfoPanel):
         with TabbedContent("Info"):
             yield self.component
 
-    async def watch_selected(self, selected: str) -> None:
-        self.query_one(TabbedContent).border_title = f"Secret: {selected}"
-        info = await self.backend.get_config_info(selected)
+    async def watch_selected(self, selected: SelectedContent) -> None:
+        if not selected:
+            return
+        self.query_one(TabbedContent).border_title = f"Config: {selected.selected_id}"
+        info = await self.backend.get_config_info(selected.selected_id)
         self.component.update(info)
