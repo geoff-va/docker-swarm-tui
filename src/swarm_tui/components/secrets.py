@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
+
 from textual.app import ComposeResult
 from textual.reactive import reactive
-from textual.widgets import Pretty, TabbedContent
+from textual.widgets import TabbedContent, TextArea
 
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
@@ -40,7 +42,7 @@ class SecretsInfo(InfoPanel):
     ]
 
     def compose(self) -> ComposeResult:
-        self.component = Pretty({})
+        self.component = TextArea(read_only=True, language="json")
         with TabbedContent("Info"):
             yield self.component
 
@@ -49,4 +51,4 @@ class SecretsInfo(InfoPanel):
             return
         self.query_one(TabbedContent).border_title = f"Secret: {selected.selected_id}"
         info = await self.backend.get_secret_info(selected.selected_id)
-        self.component.update(info)
+        self.component.text = json.dumps(info, indent=2, sort_keys=True)

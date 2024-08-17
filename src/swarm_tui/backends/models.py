@@ -24,8 +24,8 @@ class Config:
 
 @dataclass
 class Node:
-    name: str
-    server: str
+    hostname: str
+    id: str
 
 
 class DockerNode:

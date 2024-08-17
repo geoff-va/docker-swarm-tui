@@ -143,7 +143,10 @@ class FakeBackend(BaseBackend):
     async def get_nodes(self) -> list[str]:
         return sorted(list(self.NODES.keys()))
 
-    async def get_node_info(
+    async def get_node_info(self, node_id: str) -> dict[str, Any]:
+        return self.NODES.get(node_id, {})
+
+    async def get_stack_service_info(
         self, node_id: str, node_type: models.DockerNodeType
     ) -> dict[str, Any]:
         if node_type == models.DockerNodeType.STACK:

@@ -40,18 +40,20 @@ class AioDockerBackend(BaseBackend):
     async def decode_config_data(self, data: str) -> str:
         return base64.b64decode(data).decode("utf-8")
 
-    async def get_nodes(self) -> list[str]:
-        return []
+    async def get_nodes(self) -> list[models.Node]:
+        result = await self.docker.nodes.list()
+        return [
+            models.Node(hostname=item["Description"]["Hostname"], id=item["ID"])
+            for item in result
+        ]
+
+    async def get_node_info(self, node_id: str) -> dict[str, Any]:
+        return dict(await self.docker.nodes.inspect(node_id=node_id))
 
     async def get_stacks_and_services(
         self,
     ) -> tuple[list[models.Stack], list[models.Service]]:
         return [], []
-
-    async def get_node_info(
-        self, node_id: str, node_type: models.DockerNodeType
-    ) -> dict[str, Any]:
-        return {}
 
     async def get_node_tasks(self, node_id: str) -> list[dict[str, Any]]:
         return []

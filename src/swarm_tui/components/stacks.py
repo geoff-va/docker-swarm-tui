@@ -93,7 +93,7 @@ class StackInfo(InfoPanel):
         if not selected or selected.data is None:
             return
         self.query_one(TabbedContent).border_title = f"Entity: {selected.data.name}"
-        info = await self.backend.get_node_info(
+        info = await self.backend.get_stack_service_info(
             selected.data.name, node_type=selected.data.node_type
         )
         self.component.update(info)
