@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
+
+from rich.pretty import Pretty
 from textual.app import ComposeResult
 from textual.reactive import reactive
-from textual.widgets import Pretty, TabbedContent
+from textual.widgets import TabbedContent, TabPane, TextArea
 
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
@@ -44,13 +47,35 @@ class ConfigInfo(InfoPanel):
     ]
 
     def compose(self) -> ComposeResult:
-        self.component = Pretty({})
-        with TabbedContent("Info"):
-            yield self.component
+        self.info = TextArea(read_only=True, language="json")
+        self.config = TextArea(read_only=True)
+        with TabbedContent():
+            with TabPane("Info", id="info"):
+                yield self.info
+            with TabPane("Config", id="config"):
+                yield self.config
 
     async def watch_selected(self, selected: SelectedContent) -> None:
         if not selected:
             return
-        self.query_one(TabbedContent).border_title = f"Config: {selected.selected_id}"
-        info = await self.backend.get_config_info(selected.selected_id)
-        self.component.update(info)
+        tc = self.query_one(TabbedContent)
+        tc.border_title = f"Config: {selected.selected_id}"
+        await self.update_active_tab(selected.selected_id, tc.active)
+
+    async def on_tabbed_content_tab_activated(
+        self, message: TabbedContent.TabActivated
+    ):
+        if not self.selected:
+            return
+
+        await self.update_active_tab(
+            self.selected.selected_id, message.tabbed_content.active
+        )
+
+    async def update_active_tab(self, selected_id: str, tab_id: str) -> None:
+        info = await self.backend.get_config_info(selected_id)
+        if tab_id == "info":
+            self.info.text = json.dumps(info, indent=2, sort_keys=True)
+        else:
+            data = await self.backend.decode_config_data(info["Spec"]["Data"])
+            self.config.text = data

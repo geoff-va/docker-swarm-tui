@@ -6,6 +6,7 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import ContentSwitcher, Footer, Header
 
 from swarm_tui.backends.base import BaseBackend
+from swarm_tui.backends.docker import AioDockerBackend
 from swarm_tui.backends.fake import FakeBackend
 from swarm_tui.components.config import Config, ConfigInfo
 from swarm_tui.components.datatable_nav import SelectionChanged
@@ -77,7 +78,7 @@ class SwarmTui(App):
 
 
 def tui():
-    backend = FakeBackend()
+    backend = AioDockerBackend()
     app = SwarmTui(backend)
     app.run()
 
