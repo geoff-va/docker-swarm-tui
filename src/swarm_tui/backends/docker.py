@@ -105,5 +105,15 @@ class AioDockerBackend(BaseBackend):
 
         return list(stacks.values()), list(services.values())
 
+    async def get_stack_service_info(
+        self, node_id: str, node_type: models.DockerNode
+    ) -> dict[str, Any]:
+        if node_type == models.DockerNodeType.STACK:
+            return {"Info": "Docker does not provide stack information"}
+        elif node_type == models.DockerNodeType.SERVICE:
+            return dict(await self.docker.services.inspect(node_id))
+        else:
+            return dict(await self.docker.tasks.inspect(node_id))
+
     async def get_node_tasks(self, node_id: str) -> list[dict[str, Any]]:
         return []

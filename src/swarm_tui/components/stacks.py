@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
+
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.reactive import reactive
-from textual.widgets import Pretty, RichLog, Static, TabbedContent, TextArea, Tree
+from textual.widgets import RichLog, TabbedContent, TextArea, Tree
 
 from ..backends import models
 from .datatable_nav import SelectionChanged
@@ -51,7 +53,6 @@ class Stacks(NavigablePanel):
                 f"📚 {stack.name} ({len(stack.services)})", data=stack
             )
             for service in stack.services:
-                # TODO: Add running/desired
                 running = [
                     t for t in service.tasks if t.state == models.TaskState.RUNNING
                 ]
@@ -94,7 +95,7 @@ class StackInfo(InfoPanel):
     ]
 
     def compose(self) -> ComposeResult:
-        self.component = Pretty("(Don't look at me)")
+        self.component = TextArea(read_only=True, language="json")
         self.docker_log = RichLog()
         with TabbedContent("Info", "Logs"):
             yield self.component
@@ -105,6 +106,6 @@ class StackInfo(InfoPanel):
             return
         self.query_one(TabbedContent).border_title = f"Entity: {selected.data.name}"
         info = await self.backend.get_stack_service_info(
-            selected.data.name, node_type=selected.data.node_type
+            selected.data.id, node_type=selected.data.node_type
         )
-        self.component.update(info)
+        self.component.text = json.dumps(info, indent=2, sort_keys=True)

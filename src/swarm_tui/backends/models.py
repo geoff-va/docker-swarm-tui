@@ -11,6 +11,11 @@ class DockerNodeType(Enum):
 
 
 class TaskState(Enum):
+    """Valid states for a swarm Task
+
+    Shown in order they move through
+    """
+
     NEW = "new"
     PENDING = "pending"
     ASSIGNED = "assigned"
