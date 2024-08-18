@@ -49,7 +49,7 @@ class FakeBackend(BaseBackend):
 
     NODES = {
         "manager 1": {
-            "ID": "7yzl92x79aoyfc2sjpnr8wfsn",
+            "ID": "manager 1",
             "Version": {"Index": 15996},
             "CreatedAt": "2024-03-19T21:12:44.287483594Z",
             "UpdatedAt": "2024-08-17T06:14:52.975264179Z",
@@ -92,7 +92,7 @@ class FakeBackend(BaseBackend):
                 "Addr": "192.168.65.3:2377",
             },
         },
-        "worker 1": {"ID": "my-id"},
+        "worker 1": {"ID": "worker 1"},
     }
     CONFIGS = {
         "config 1": {"heres": {"some": "nested"}, "keys": "!!!"},
