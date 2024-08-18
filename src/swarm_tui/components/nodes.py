@@ -30,6 +30,9 @@ class Nodes(NavigablePanel):
         self.table.add_column("Name", key="Name")
         yield self.table
 
+    def focus_child(self) -> None:
+        self.table.focus()
+
     def watch_data(self, rows: list[Node]) -> None:
         self.table.clear()
         for row in rows:

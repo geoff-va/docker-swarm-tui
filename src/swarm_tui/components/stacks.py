@@ -39,6 +39,9 @@ class Stacks(NavigablePanel):
         self.stack_tree.show_root = False
         yield self.stack_tree
 
+    def focus_child(self) -> None:
+        self.stack_tree.focus()
+
     def watch_stacks_and_services(
         self, stacks_and_services: tuple[list[models.Stack], list[models.Service]]
     ) -> None:

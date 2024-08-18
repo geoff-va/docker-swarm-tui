@@ -3,6 +3,7 @@ import logging
 from aiodocker import Docker
 from textual import work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.widgets import ContentSwitcher, Footer, Header
 
@@ -27,8 +28,12 @@ class SwarmTui(App):
     AUTO_FOCUS = ""
     CSS_PATH = "./tui.tcss"
     BINDINGS = [
-        ("q", "quit", "Quit"),
-        ("r", "refresh", "Refresh"),
+        Binding("q", "quit", "Quit"),
+        Binding("r", "refresh", "Refresh"),
+        Binding("1", "focus1", "Focus Stacks", show=False),
+        Binding("2", "focus2", "Focus Config", show=False),
+        Binding("3", "focus3", "Focus Secrets", show=False),
+        Binding("4", "focus4", "Focus Nodes", show=False),
     ]
 
     def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
@@ -51,6 +56,21 @@ class SwarmTui(App):
                     yield SecretsInfo(self.backend, id="secrets-info")
                     yield NodeInfo(self.backend, id="node-info")
         yield Footer()
+
+    def action_focus1(self) -> None:
+        self.query_one(Stacks).focus_child()
+
+    def action_focus2(self) -> None:
+        self.log.info("Focus 2")
+        self.query_one(Config).focus_child()
+
+    def action_focus3(self) -> None:
+        self.log.info("Focus 3")
+        self.query_one(Secrets).focus_child()
+
+    def action_focus4(self) -> None:
+        self.log.info("Focus 4")
+        self.query_one(Nodes).focus_child()
 
     def action_refresh(self) -> None:
         self.refresh_all()

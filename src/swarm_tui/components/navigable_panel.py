@@ -21,3 +21,7 @@ class NavigablePanel(Static):
                 control_id=self._control_id, selected_id=message.row_key.value
             )
         )
+
+    def focus_child(self) -> None:
+        """Focus your appropriate child control"""
+        ...
