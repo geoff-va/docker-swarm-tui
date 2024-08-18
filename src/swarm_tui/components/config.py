@@ -60,6 +60,7 @@ class ConfigInfo(InfoPanel):
             return
         tc = self.query_one(TabbedContent)
         tc.border_title = f"Config: {selected.selected_id}"
+        tc.active = "info"
         await self.update_active_tab(selected.selected_id, tc.active)
 
     async def on_tabbed_content_tab_activated(
