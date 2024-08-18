@@ -1,5 +1,6 @@
 import logging
 
+from aiodocker import Docker
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -15,6 +16,7 @@ from swarm_tui.components.info_panel import InfoPanel
 from swarm_tui.components.nodes import NodeInfo, Nodes
 from swarm_tui.components.secrets import Secrets, SecretsInfo
 from swarm_tui.components.stacks import StackInfo, Stacks
+from swarm_tui.exceptions import DockerApiError
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +28,7 @@ class SwarmTui(App):
     CSS_PATH = "./tui.tcss"
     BINDINGS = [
         ("q", "quit", "Quit"),
+        ("r", "refresh", "Refresh"),
     ]
 
     def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
@@ -49,7 +52,13 @@ class SwarmTui(App):
                     yield NodeInfo(self.backend, id="node-info")
         yield Footer()
 
+    def action_refresh(self) -> None:
+        self.refresh_all()
+
     def on_mount(self) -> None:
+        self.refresh_all()
+
+    def refresh_all(self) -> None:
         self.load_secrets()
         self.load_nodes()
         self.load_configs()
@@ -57,20 +66,36 @@ class SwarmTui(App):
 
     @work
     async def load_secrets(self) -> None:
-        self.query_one(Secrets).data = await self.backend.get_secrets()
+        try:
+            self.query_one(Secrets).data = await self.backend.get_secrets()
+        except DockerApiError as e:
+            self.notify(title="Error loading secrets", message=str(e), severity="error")
+            self.query_one(Secrets).data = []
 
     @work
     async def load_nodes(self) -> None:
-        self.query_one(Nodes).data = await self.backend.get_nodes()
+        try:
+            self.query_one(Nodes).data = await self.backend.get_nodes()
+        except DockerApiError as e:
+            self.notify(title="Error loading secrets", message=str(e), severity="error")
+            self.query_one(Nodes).data = []
 
     @work
     async def load_configs(self) -> None:
-        self.query_one(Config).data = await self.backend.get_configs()
+        try:
+            self.query_one(Config).data = await self.backend.get_configs()
+        except DockerApiError as e:
+            self.notify(title="Error loading secrets", message=str(e), severity="error")
+            self.query_one(Config).data = []
 
     @work
     async def load_stacks_and_services(self) -> None:
-        stacks_and_services = await self.backend.get_stacks_and_services()
-        self.query_one(Stacks).stacks_and_services = stacks_and_services
+        try:
+            stacks_and_services = await self.backend.get_stacks_and_services()
+            self.query_one(Stacks).stacks_and_services = stacks_and_services
+        except DockerApiError as e:
+            self.notify(title="Error loading secrets", message=str(e), severity="error")
+            self.query_one(Stacks).stacks_and_services = [], []
 
     async def on_selection_changed(self, message: SelectionChanged):
         info = self.query_one(f"#{message.control_id}", InfoPanel)

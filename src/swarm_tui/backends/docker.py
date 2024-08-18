@@ -1,13 +1,26 @@
 from __future__ import annotations
 
 import base64
-from typing import Any, cast
+from typing import Any
 
 import aiodocker
-from textual import log
+from aiodocker.exceptions import DockerError
 
+from ..exceptions import DockerApiError
 from . import models
 from .base import BaseBackend
+
+
+def docker_exc_wrapper(func):
+    """Re-Raise DockerError as our DockerApiError"""
+
+    def _inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except DockerError as e:
+            raise DockerApiError(e)
+
+    return _inner
 
 
 class AioDockerBackend(BaseBackend):
@@ -22,24 +35,30 @@ class AioDockerBackend(BaseBackend):
             self._docker = aiodocker.Docker()
         return self._docker
 
+    @docker_exc_wrapper
     async def get_secrets(self) -> list[str]:
         result = await self.docker.secrets.list()
         return [item["Spec"]["Name"] for item in result]
 
+    @docker_exc_wrapper
     async def get_secret_info(self, secret_id: str) -> dict[str, Any]:
         return dict(await self.docker.secrets.inspect(secret_id))
 
+    @docker_exc_wrapper
     async def get_configs(self) -> list[str]:
         result = await self.docker.configs.list()
         return [item["Spec"]["Name"] for item in result]
 
+    @docker_exc_wrapper
     async def get_config_info(self, config_id: str) -> dict[str, Any]:
         result = await self.docker.configs.inspect(config_id)
         return dict(result)
 
+    @docker_exc_wrapper
     async def decode_config_data(self, data: str) -> str:
         return base64.b64decode(data).decode("utf-8")
 
+    @docker_exc_wrapper
     async def get_nodes(self) -> list[models.Node]:
         result = await self.docker.nodes.list()
         return [
@@ -47,9 +66,11 @@ class AioDockerBackend(BaseBackend):
             for item in result
         ]
 
+    @docker_exc_wrapper
     async def get_node_info(self, node_id: str) -> dict[str, Any]:
         return dict(await self.docker.nodes.inspect(node_id=node_id))
 
+    @docker_exc_wrapper
     async def get_stacks_and_services(
         self,
     ) -> tuple[list[models.Stack], list[models.Service]]:
@@ -105,6 +126,7 @@ class AioDockerBackend(BaseBackend):
 
         return list(stacks.values()), list(services.values())
 
+    @docker_exc_wrapper
     async def get_stack_service_info(
         self, node_id: str, node_type: models.DockerNode
     ) -> dict[str, Any]:
@@ -115,5 +137,6 @@ class AioDockerBackend(BaseBackend):
         else:
             return dict(await self.docker.tasks.inspect(node_id))
 
+    @docker_exc_wrapper
     async def get_node_tasks(self, node_id: str) -> list[dict[str, Any]]:
         return []

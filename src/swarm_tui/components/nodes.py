@@ -7,6 +7,7 @@ from textual.reactive import reactive
 from textual.widgets import TabbedContent, TextArea
 
 from ..backends.models import Node
+from ..exceptions import DockerApiError
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
 from .models import SelectedContent
@@ -50,5 +51,9 @@ class NodeInfo(InfoPanel):
         if not selected:
             return
         self.query_one(TabbedContent).border_title = f"Node: {selected.selected_id}"
-        info = await self.backend.get_node_info(selected.selected_id)
-        self.component.text = json.dumps(info, indent=2, sort_keys=True)
+        try:
+            info = await self.backend.get_node_info(selected.selected_id)
+            self.component.text = json.dumps(info, indent=2, sort_keys=True)
+        except DockerApiError as e:
+            self.notify(str(e), severity="error")
+            self.component.text = "{}"

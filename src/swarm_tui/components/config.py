@@ -7,6 +7,7 @@ from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import TabbedContent, TabPane, TextArea
 
+from ..exceptions import DockerApiError
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
 from .models import SelectedContent
@@ -74,9 +75,14 @@ class ConfigInfo(InfoPanel):
         )
 
     async def update_active_tab(self, selected_id: str, tab_id: str) -> None:
-        info = await self.backend.get_config_info(selected_id)
-        if tab_id == "info":
-            self.info.text = json.dumps(info, indent=2, sort_keys=True)
-        else:
-            data = await self.backend.decode_config_data(info["Spec"]["Data"])
-            self.config.text = data
+        component = self.info if tab_id == "info" else self.config
+        try:
+            info = await self.backend.get_config_info(selected_id)
+            if tab_id == "info":
+                component.text = json.dumps(info, indent=2, sort_keys=True)
+            else:
+                data = await self.backend.decode_config_data(info["Spec"]["Data"])
+                component.text = data
+        except DockerApiError as e:
+            self.notify(str(e), severity="error")
+            component.text = "{}"

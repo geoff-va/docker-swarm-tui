@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 
+from aiodocker import Docker
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import TabbedContent, TextArea
 
+from ..exceptions import DockerApiError
 from .datatable_nav import DataTableNav
 from .info_panel import InfoPanel
 from .models import SelectedContent
@@ -49,6 +51,12 @@ class SecretsInfo(InfoPanel):
     async def watch_selected(self, selected: SelectedContent) -> None:
         if not selected:
             return
-        self.query_one(TabbedContent).border_title = f"Secret: {selected.selected_id}"
-        info = await self.backend.get_secret_info(selected.selected_id)
-        self.component.text = json.dumps(info, indent=2, sort_keys=True)
+        try:
+            self.query_one(
+                TabbedContent
+            ).border_title = f"Secret: {selected.selected_id}"
+            info = await self.backend.get_secret_info(selected.selected_id)
+            self.component.text = json.dumps(info, indent=2, sort_keys=True)
+        except DockerApiError as e:
+            self.notify(str(e), severity="error")
+            self.component.text = "{}"

@@ -8,6 +8,7 @@ from textual.reactive import reactive
 from textual.widgets import RichLog, TabbedContent, TextArea, Tree
 
 from ..backends import models
+from ..exceptions import DockerApiError
 from .datatable_nav import SelectionChanged
 from .info_panel import InfoPanel
 from .models import SelectedContent
@@ -105,7 +106,11 @@ class StackInfo(InfoPanel):
         if not selected or selected.data is None:
             return
         self.query_one(TabbedContent).border_title = f"Entity: {selected.data.name}"
-        info = await self.backend.get_stack_service_info(
-            selected.data.id, node_type=selected.data.node_type
-        )
-        self.component.text = json.dumps(info, indent=2, sort_keys=True)
+        try:
+            info = await self.backend.get_stack_service_info(
+                selected.data.id, node_type=selected.data.node_type
+            )
+            self.component.text = json.dumps(info, indent=2, sort_keys=True)
+        except DockerApiError as e:
+            self.notify(str(e), severity="error")
+            self.component.text = "{}"
