@@ -44,15 +44,22 @@ class Stacks(NavigablePanel):
         # TODO: See if we can make "headers" so they aren't selectable
         if stacks:
             self.stack_tree.root.add(
-                Text("-- Stack Services --", style="bold cyan"), allow_expand=False
+                Text("-- Stacks --", style="bold cyan"), allow_expand=False
             )
         for stack in stacks:
             stack_node = self.stack_tree.root.add(
                 f"📚 {stack.name} ({len(stack.services)})", data=stack
             )
             for service in stack.services:
-                service_node = stack_node.add(f"⍾ {service.name}", data=service)
-                for task in service.tasks:
+                # TODO: Add running/desired
+                running = [
+                    t for t in service.tasks if t.state == models.TaskState.RUNNING
+                ]
+                service_node = stack_node.add(
+                    f"⍾ {service.name} ({len(running)}/{len(service.tasks)})",
+                    data=service,
+                )
+                for task in sorted(service.tasks, key=lambda x: x.name):
                     service_node.add_leaf(task.name, data=task)
 
         if services:
@@ -61,8 +68,12 @@ class Stacks(NavigablePanel):
             )
 
         for service in services:
-            service_node = self.stack_tree.root.add(f"⍾ {service.name}", data=service)
-            for task in service.tasks:
+            running = [t for t in service.tasks if t.state == models.TaskState.RUNNING]
+            service_node = self.stack_tree.root.add(
+                f"⍾ {service.name} ({len(running)}/{len(service.tasks)})",
+                data=service,
+            )
+            for task in sorted(service.tasks, key=lambda x: x.name):
                 service_node.add_leaf(task.name, data=task)
 
     def on_tree_node_selected(self, message: Tree.NodeSelected) -> None:

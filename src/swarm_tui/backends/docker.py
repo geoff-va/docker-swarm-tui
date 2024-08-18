@@ -53,7 +53,57 @@ class AioDockerBackend(BaseBackend):
     async def get_stacks_and_services(
         self,
     ) -> tuple[list[models.Stack], list[models.Service]]:
-        return [], []
+        # stacks: need to use services.list() and find the ones with a
+        # Spec.Labels["com.docker.stack.namespace"]
+        # If label dne, not part of stack
+        # services - can also get all those at the same time
+
+        # To correlate tasks -> services; task has a ServiceID == service's ID
+        # Task # like helloworld.<num> is from the slot
+        services_resp = await self.docker.services.list()
+        tasks_resp = await self.docker.tasks.list(filters={"desired-state": "running"})
+
+        stacks = {}
+        services = {}
+
+        # Populate empty stacks and service objects
+        # Stacks key: name, services key: id
+        for service in services_resp:
+            service_obj = models.Service(
+                name=service["Spec"]["Name"], id=service["ID"], tasks=[]
+            )
+
+            stack_name = service["Spec"]["Labels"].get("com.docker.stack.namespace")
+            if stack_name:
+                if stack_name not in stacks:
+                    stacks[stack_name] = models.Stack(
+                        name=stack_name, id=service["ID"], services=[]
+                    )
+                # Current service belongs to a stack so add it
+                stacks[stack_name].services.append(service_obj)
+
+            # Adds all services initially so we can also add their tasks easilyo
+            # since the service object can be shared in the stack services
+            services[service_obj.id] = service_obj
+
+        # populate tasks to all services
+        for task in tasks_resp:
+            service_id = task["ServiceID"]
+            if service_id in services:
+                services[service_id].tasks.append(
+                    models.Task(
+                        name=f"{services[service_id].name}.{task['Slot']}",
+                        id=task["ID"],
+                        state=models.TaskState(task["Status"]["State"]),
+                    )
+                )
+        # Remove services that are part of a stack
+        for stack in stacks.values():
+            for service in stack.services:
+                if service.id in services:
+                    services.pop(service.id)
+
+        return list(stacks.values()), list(services.values())
 
     async def get_node_tasks(self, node_id: str) -> list[dict[str, Any]]:
         return []

@@ -102,23 +102,37 @@ class FakeBackend(BaseBackend):
     STACKS = [
         models.Stack(
             "stack 1",
+            id="stack.1",
             services=[
                 models.Service(
                     "service 1",
-                    tasks=[models.Task("task.1"), models.Task("task.2")],
+                    id="stack1.service1",
+                    tasks=[
+                        models.Task("task.1", id="stack1.service1.task1"),
+                        models.Task("task.2", id="stack1.service1.task2"),
+                    ],
                 ),
                 models.Service(
                     "service 2",
-                    tasks=[models.Task("task.1"), models.Task("task.2")],
+                    id="stack1.service2",
+                    tasks=[
+                        models.Task("task.1", id="stack1.service2.task1"),
+                        models.Task("task.2", id="stack1.service2.task2"),
+                    ],
                 ),
             ],
         ),
         models.Stack(
             "stack 2",
+            id="stack2",
             services=[
                 models.Service(
                     "service 1",
-                    tasks=[models.Task("task.1"), models.Task("task.2")],
+                    id="stack2.service1",
+                    tasks=[
+                        models.Task("task1.", id="stack2.service1.task1"),
+                        models.Task("task2.", id="stack2.service1.task2"),
+                    ],
                 )
             ],
         ),
@@ -126,11 +140,20 @@ class FakeBackend(BaseBackend):
     SERVICES = [
         models.Service(
             "service 3",
-            tasks=[models.Task("task.1"), models.Task("task.2")],
+            id="service3",
+            tasks=[
+                models.Task("task.1", id="service3.task1"),
+                models.Task("task.2", id="service3.task2"),
+            ],
         ),
         models.Service(
             "service 4",
-            tasks=[models.Task("task.1"), models.Task("task.2"), models.Task("task.3")],
+            id="service4",
+            tasks=[
+                models.Task("task.1", id="servic4.task1"),
+                models.Task("task.2", id="servic4.task2"),
+                models.Task("task.3", id="servic4.task3"),
+            ],
         ),
     ]
 
