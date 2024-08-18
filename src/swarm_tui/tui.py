@@ -12,11 +12,11 @@ from swarm_tui.backends.docker import AioDockerBackend
 from swarm_tui.backends.fake import FakeBackend
 from swarm_tui.components.config import Config, ConfigInfo
 from swarm_tui.components.datatable_nav import SelectionChanged
-from swarm_tui.components.docker_info import DockerInfo
 from swarm_tui.components.info_panel import InfoPanel
 from swarm_tui.components.nodes import NodeInfo, Nodes
 from swarm_tui.components.secrets import Secrets, SecretsInfo
 from swarm_tui.components.stacks import StackInfo, Stacks
+from swarm_tui.components.swarm_info import SwarmInfo
 from swarm_tui.exceptions import DockerApiError
 
 log = logging.getLogger(__name__)
@@ -30,6 +30,7 @@ class SwarmTui(App):
     BINDINGS = [
         Binding("q", "quit", "Quit"),
         Binding("r", "refresh", "Refresh"),
+        Binding("0", "focus0", "Swarm Info", show=False),
         Binding("1", "focus1", "Focus Stacks", show=False),
         Binding("2", "focus2", "Focus Config", show=False),
         Binding("3", "focus3", "Focus Secrets", show=False),
@@ -50,12 +51,18 @@ class SwarmTui(App):
                 yield Nodes(4, "node-info")
             with Vertical(id="right"):
                 with ContentSwitcher(id="info-pane", initial="docker-info"):
-                    yield DockerInfo(id="docker-info")
+                    yield SwarmInfo(self.backend, id="docker-info")
                     yield StackInfo(self.backend, id="stack-info")
                     yield ConfigInfo(self.backend, id="config-info")
                     yield SecretsInfo(self.backend, id="secrets-info")
                     yield NodeInfo(self.backend, id="node-info")
         yield Footer()
+
+    def action_focus0(self) -> None:
+        info = self.query_one("#docker-info", SwarmInfo)
+        info.loading = True
+        self.query_one("#info-pane", ContentSwitcher).current = "docker-info"
+        info.loading = False
 
     def action_focus1(self) -> None:
         self.query_one(Stacks).focus_child()
@@ -79,10 +86,20 @@ class SwarmTui(App):
         self.refresh_all()
 
     def refresh_all(self) -> None:
+        self.load_swarm_info()
         self.load_secrets()
         self.load_nodes()
         self.load_configs()
         self.load_stacks_and_services()
+
+    @work
+    async def load_swarm_info(self) -> None:
+        try:
+            self.query_one(SwarmInfo).load_swarm_info()
+        except DockerApiError as e:
+            self.notify(
+                title="Error loading Swarm Info", message=str(e), severity="error"
+            )
 
     @work
     async def load_secrets(self) -> None:

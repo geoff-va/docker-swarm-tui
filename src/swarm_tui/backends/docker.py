@@ -36,6 +36,10 @@ class AioDockerBackend(BaseBackend):
         return self._docker
 
     @docker_exc_wrapper
+    def get_swarm_info(self) -> dict[strm]:
+        return self.docker.swarm.inspect()
+
+    @docker_exc_wrapper
     async def get_secrets(self) -> list[str]:
         result = await self.docker.secrets.list()
         return [item["Spec"]["Name"] for item in result]

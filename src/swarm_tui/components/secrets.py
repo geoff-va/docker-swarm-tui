@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 
-from aiodocker import Docker
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import TabbedContent, TextArea
