@@ -127,6 +127,7 @@ class SwarmTui(App):
 
 def tui():
     backend = AioDockerBackend()
+    # backend = FakeBackend()
     app = SwarmTui(backend)
     app.run()
 

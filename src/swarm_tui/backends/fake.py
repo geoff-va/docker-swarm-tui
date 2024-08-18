@@ -92,7 +92,7 @@ class FakeBackend(BaseBackend):
                 "Addr": "192.168.65.3:2377",
             },
         },
-        "worker 1": {"other": "stuff..."},
+        "worker 1": {"ID": "my-id"},
     }
     CONFIGS = {
         "config 1": {"heres": {"some": "nested"}, "keys": "!!!"},
@@ -163,8 +163,11 @@ class FakeBackend(BaseBackend):
     async def get_secret_info(self, secret_id: str) -> dict[str, Any]:
         return self.SECRETS.get(secret_id, {})
 
-    async def get_nodes(self) -> list[str]:
-        return sorted(list(self.NODES.keys()))
+    async def get_nodes(self) -> list[models.Node]:
+        return sorted(
+            [models.Node(hostname=k, id=self.NODES[k]["ID"]) for k in self.NODES],
+            key=lambda x: x.hostname,
+        )
 
     async def get_node_info(self, node_id: str) -> dict[str, Any]:
         return self.NODES.get(node_id, {})
@@ -184,6 +187,9 @@ class FakeBackend(BaseBackend):
 
     async def get_config_info(self, config_id: str) -> dict[str, Any]:
         return self.CONFIGS.get(config_id, {})
+
+    async def decode_config_data(self, info: dict[str, Any]) -> str:
+        return "Some decoded data (static for all configs here)"
 
     async def get_stacks_and_services(
         self,

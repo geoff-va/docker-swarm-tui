@@ -55,8 +55,8 @@ class AioDockerBackend(BaseBackend):
         return dict(result)
 
     @docker_exc_wrapper
-    async def decode_config_data(self, data: str) -> str:
-        return base64.b64decode(data).decode("utf-8")
+    async def decode_config_data(self, info: dict[str, Any]) -> str:
+        return base64.b64decode(info["Spec"]["Data"]).decode("utf-8")
 
     @docker_exc_wrapper
     async def get_nodes(self) -> list[models.Node]:

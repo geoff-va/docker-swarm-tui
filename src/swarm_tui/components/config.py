@@ -84,7 +84,7 @@ class ConfigInfo(InfoPanel):
             if tab_id == "info":
                 component.text = json.dumps(info, indent=2, sort_keys=True)
             else:
-                data = await self.backend.decode_config_data(info["Spec"]["Data"])
+                data = await self.backend.decode_config_data(info)
                 component.text = data
         except DockerApiError as e:
             self.notify(str(e), severity="error")
