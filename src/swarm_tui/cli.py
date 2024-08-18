@@ -1,5 +1,7 @@
 import click
 
+from swarm_tui.backends.docker import AioDockerBackend
+from swarm_tui.backends.fake import FakeBackend
 from swarm_tui.tui import SwarmTui
 
 
@@ -8,7 +10,8 @@ from swarm_tui.tui import SwarmTui
 @click.pass_context
 def cli(ctx, fake) -> None:
     """Run the tui"""
-    tui = SwarmTui()
+    backend = FakeBackend() if fake else AioDockerBackend()
+    tui = SwarmTui(backend)
     tui.run()
 
 
