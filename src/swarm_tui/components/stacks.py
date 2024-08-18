@@ -35,6 +35,7 @@ class Stacks(NavigablePanel):
 
     def compose(self) -> ComposeResult:
         self.stack_tree: Tree[models.DockerNode] = Tree("Stacks")
+        self.stack_tree.auto_expand = False
         self.stack_tree.guide_depth = 3
         self.stack_tree.show_root = False
         yield self.stack_tree
