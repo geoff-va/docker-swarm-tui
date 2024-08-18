@@ -12,7 +12,6 @@
 Stacks {
 	height: 1fr;
 	border: round $primary;
-	overflow-y: auto;
 }
 
 Stacks:focus-within {
@@ -27,11 +26,6 @@ NavigablePanel {
 
 NavigablePanel:focus-within {
 	border: round $secondary;
-}
-
-
-Tree {
-	height: auto;
 }
 
 TabbedContent {
@@ -52,3 +46,4 @@ TabbedContent TextArea {
 ContentSwitcher {
 	height: 1fr;
 }
+

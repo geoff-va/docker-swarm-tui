@@ -93,6 +93,14 @@ class FakeBackend(BaseBackend):
             },
         },
         "worker 1": {"ID": "worker 1"},
+        "worker 2": {"ID": "worker 2"},
+        "worker 3": {"ID": "worker 3"},
+        "worker 4": {"ID": "worker 4"},
+        "worker 5": {"ID": "worker 5"},
+        "worker 6": {"ID": "worker 6"},
+        "worker 7": {"ID": "worker 7"},
+        "worker 8": {"ID": "worker 8"},
+        "worker 9": {"ID": "worker 9"},
     }
     CONFIGS = {
         "config 1": {"heres": {"some": "nested"}, "keys": "!!!"},
