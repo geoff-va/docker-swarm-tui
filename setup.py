@@ -12,9 +12,8 @@ setup(
     include_package_data=True,
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
     install_requires=[
-        "textual",
-        "tomlkit>=0.12.3",
-        "httpx>=0.26.0",
+        "textual[syntax]",
+        "aiodocker~=0.22.1",
         "click>=8.1.7",
     ],
     extras_require={
