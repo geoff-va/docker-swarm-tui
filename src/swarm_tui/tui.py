@@ -11,6 +11,7 @@ from swarm_tui.backends.fake import FakeBackend
 from swarm_tui.components.config import Config, ConfigInfo
 from swarm_tui.components.datatable_nav import SelectionChanged
 from swarm_tui.components.docker_info import DockerInfo
+from swarm_tui.components.info_panel import InfoPanel
 from swarm_tui.components.nodes import NodeInfo, Nodes
 from swarm_tui.components.secrets import Secrets, SecretsInfo
 from swarm_tui.components.stacks import StackInfo, Stacks
@@ -72,9 +73,11 @@ class SwarmTui(App):
         self.query_one(Stacks).stacks_and_services = stacks_and_services
 
     async def on_selection_changed(self, message: SelectionChanged):
-        info = self.query_one(f"#{message.control_id}")
+        info = self.query_one(f"#{message.control_id}", InfoPanel)
+        info.loading = True
         info.selected = message.selected_content
         self.query_one("#info-pane", ContentSwitcher).current = message.control_id
+        info.loading = False
 
 
 def tui():
