@@ -19,11 +19,11 @@ class Nodes(NavigablePanel):
     BORDER_TITLE = "Nodes"
 
     BINDINGS = [
-        Binding("w", "worker", "Worker Token"),
-        Binding("m", "manager", "Manger Token"),
-        Binding("p", "promote", "Promote Node"),
-        Binding("r", "remove", "Remove Node"),
-        Binding("R", "force_remove", "Force Remove Node", show=False),
+        # TODO: Implement these
+        # Binding("d", "demote", "Demote"),
+        # Binding("p", "promote", "Promote"),
+        Binding("r", "remove", "Remove"),
+        Binding("R", "force_remove", "Force Remove"),
     ]
 
     data: reactive[list[Node]] = reactive([])
@@ -68,22 +68,6 @@ class Nodes(NavigablePanel):
             title=title,
             severity="information",
         )
-
-    async def action_worker(self) -> None:
-        # TODO: Create model for user to copy join token/command
-        try:
-            token = await self.backend.get_worker_token()
-            self.notify(message=token, title="Worker Token", severity="information")
-        except DockerApiError as e:
-            self.notify(str(e), title="Worker Token Error", severity="error")
-
-    async def action_manager(self) -> None:
-        # TODO: Create model for user to copy join token/command
-        try:
-            token = await self.backend.get_manager_token()
-            self.notify(message=token, title="Manager Token", severity="information")
-        except DockerApiError as e:
-            self.notify(str(e), title="Manager Token Error", severity="error")
 
 
 class NodeInfo(InfoPanel):

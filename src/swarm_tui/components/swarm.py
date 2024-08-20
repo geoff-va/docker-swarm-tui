@@ -4,7 +4,7 @@ import json
 
 from textual import work
 from textual.app import ComposeResult
-from textual.events import DescendantFocus, Focus
+from textual.binding import Binding
 from textual.reactive import reactive
 from textual.widgets import Label, Static, TabbedContent, TextArea
 
@@ -22,9 +22,8 @@ class Swarm(Static):
     BORDER_TITLE = "Swarm Info"
 
     BINDINGS = [
-        ("a", "add", "Add"),
-        ("d", "delete", "Delete"),
-        ("r", "rename", "Rename"),
+        Binding("w", "worker", "Worker Token"),
+        Binding("m", "manager", "Manger Token"),
     ]
 
     def __init__(
@@ -45,6 +44,22 @@ class Swarm(Static):
 
     def on_descendant_focus(self) -> None:
         self.post_message(SelectionChanged(self._control_id, ""))
+
+    async def action_worker(self) -> None:
+        # TODO: Create model for user to copy join token/command
+        try:
+            token = await self.backend.get_worker_token()
+            self.notify(message=token, title="Worker Token", severity="information")
+        except DockerApiError as e:
+            self.notify(str(e), title="Worker Token Error", severity="error")
+
+    async def action_manager(self) -> None:
+        # TODO: Create model for user to copy join token/command
+        try:
+            token = await self.backend.get_manager_token()
+            self.notify(message=token, title="Manager Token", severity="information")
+        except DockerApiError as e:
+            self.notify(str(e), title="Manager Token Error", severity="error")
 
 
 class SwarmInfo(InfoPanel):
