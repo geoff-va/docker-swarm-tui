@@ -11,6 +11,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
+    python_requires=">=3.8.10",
     install_requires=[
         "textual[syntax]",
         "aiodocker~=0.22.1",
