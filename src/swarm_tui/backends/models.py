@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+# FIX: Not really a docker node type, better class name
 class DockerNodeType(Enum):
     TASK = "task"
     SERVICE = "service"

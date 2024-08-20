@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Literal
 
 from . import models
 
@@ -45,3 +45,7 @@ class BaseBackend:
     async def get_worker_token(self) -> str: ...
 
     async def get_manager_token(self) -> str: ...
+
+    async def get_node_join_cmd(
+        self, node_type: Literal["worker", "manager"]
+    ) -> str: ...

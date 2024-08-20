@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import base64
-from typing import Any
+from typing import Any, Literal
 
 import aiodocker
 from aiodocker.exceptions import DockerError
+from textual import log
 
 from ..exceptions import DockerApiError
 from . import models
@@ -36,8 +37,8 @@ class AioDockerBackend(BaseBackend):
         return self._docker
 
     @docker_exc_wrapper
-    def get_swarm_info(self) -> dict[strm]:
-        return self.docker.swarm.inspect()
+    async def get_swarm_info(self) -> dict[str, Any]:
+        return dict(await self.docker.swarm.inspect())
 
     @docker_exc_wrapper
     async def get_secrets(self) -> list[str]:
@@ -166,3 +167,33 @@ class AioDockerBackend(BaseBackend):
     async def get_manager_token(self) -> str:
         result = await self.docker.swarm.inspect()
         return result["JoinTokens"]["Manager"]
+
+    async def get_node_join_cmd(self, node_type: Literal["worker", "manager"]) -> str:
+        assert node_type in ("worker", "manager")
+        if node_type == "worker":
+            token = await self.get_worker_token()
+        else:
+            token = await self.get_manager_token()
+
+        nodes = await self.docker.nodes.list()
+        mgr_node = self._find_manager(nodes)
+        hostaddr = mgr_node["ManagerStatus"]["Addr"]
+        return f"docker swarm join --token {token} {hostaddr}"
+
+    def _find_manager(self, nodes: list[dict[str, Any]]) -> dict[str, Any]:
+        """Find a manager node that is reachable; preferably the leader"""
+        managers = []
+        for node in nodes:
+            if node["Spec"]["Role"] == "manager":
+                managers.append(node)
+                mgr_status = node["ManagerStatus"]
+                if mgr_status["Leader"] and mgr_status["Reachability"] == "reachable":
+                    return node
+
+        log.info("No reachable leaders found; searching for next reachable manager")
+        for node in managers:
+            mgr_status = node["ManagerStatus"]
+            if mgr_status["Reachability"] == "reachable":
+                return node
+
+        raise DockerApiError("No reachable managers found")
