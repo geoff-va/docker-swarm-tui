@@ -5,6 +5,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
+from textual.events import DescendantFocus, Focus
 from textual.widgets import ContentSwitcher, Footer, Header
 
 from swarm_tui.backends.base import BaseBackend
@@ -16,7 +17,7 @@ from swarm_tui.components.info_panel import InfoPanel
 from swarm_tui.components.nodes import NodeInfo, Nodes
 from swarm_tui.components.secrets import Secrets, SecretsInfo
 from swarm_tui.components.stacks import StackInfo, Stacks
-from swarm_tui.components.swarm_info import SwarmInfo
+from swarm_tui.components.swarm import Swarm, SwarmInfo
 from swarm_tui.exceptions import DockerApiError
 
 log = logging.getLogger(__name__)
@@ -25,16 +26,16 @@ log = logging.getLogger(__name__)
 class SwarmTui(App):
     """A TUI interface for swram management"""
 
-    AUTO_FOCUS = ""
+    AUTO_FOCUS = "FocusedLabel"
     CSS_PATH = "./tui.tcss"
     BINDINGS = [
         Binding("q", "quit", "Quit"),
         Binding("r", "refresh", "Refresh"),
-        Binding("0", "focus0", "Swarm Info", show=False),
-        Binding("1", "focus1", "Focus Stacks", show=False),
-        Binding("2", "focus2", "Focus Config", show=False),
-        Binding("3", "focus3", "Focus Secrets", show=False),
-        Binding("4", "focus4", "Focus Nodes", show=False),
+        Binding("1", "focus1", "Focus Swarm", show=False),
+        Binding("2", "focus2", "Focus Stacks", show=False),
+        Binding("3", "focus3", "Focus Config", show=False),
+        Binding("4", "focus4", "Focus Secrets", show=False),
+        Binding("5", "focus5", "Focus Nodes", show=False),
     ]
 
     def __init__(self, backend: BaseBackend, *args, **kwargs) -> None:
@@ -45,38 +46,33 @@ class SwarmTui(App):
         yield Header()
         with Horizontal():
             with Vertical(id="left"):
-                yield Stacks(1, "stack-info")
-                yield Config(2, "config-info")
-                yield Secrets(3, "secrets-info")
-                yield Nodes(4, "node-info")
+                yield Swarm(self.backend, 1, "swarm-info")
+                yield Stacks(self.backend, 2, "stack-info")
+                yield Config(self.backend, 3, "config-info")
+                yield Secrets(self.backend, 4, "secrets-info")
+                yield Nodes(self.backend, 5, "node-info")
             with Vertical(id="right"):
-                with ContentSwitcher(id="info-pane", initial="docker-info"):
-                    yield SwarmInfo(self.backend, id="docker-info")
+                with ContentSwitcher(id="info-pane", initial="swarm-info"):
+                    yield SwarmInfo(self.backend, id="swarm-info")
                     yield StackInfo(self.backend, id="stack-info")
                     yield ConfigInfo(self.backend, id="config-info")
                     yield SecretsInfo(self.backend, id="secrets-info")
                     yield NodeInfo(self.backend, id="node-info")
         yield Footer()
 
-    def action_focus0(self) -> None:
-        info = self.query_one("#docker-info", SwarmInfo)
-        info.loading = True
-        self.query_one("#info-pane", ContentSwitcher).current = "docker-info"
-        info.loading = False
-
     def action_focus1(self) -> None:
-        self.query_one(Stacks).focus_child()
+        self.query_one(Swarm).focus_child()
 
     def action_focus2(self) -> None:
-        self.log.info("Focus 2")
-        self.query_one(Config).focus_child()
+        self.query_one(Stacks).focus_child()
 
     def action_focus3(self) -> None:
-        self.log.info("Focus 3")
-        self.query_one(Secrets).focus_child()
+        self.query_one(Config).focus_child()
 
     def action_focus4(self) -> None:
-        self.log.info("Focus 4")
+        self.query_one(Secrets).focus_child()
+
+    def action_focus5(self) -> None:
         self.query_one(Nodes).focus_child()
 
     def action_refresh(self) -> None:
@@ -135,6 +131,7 @@ class SwarmTui(App):
             self.query_one(Stacks).stacks_and_services = [], []
 
     async def on_selection_changed(self, message: SelectionChanged):
+        self.log.info(f"Selecting: {message.control_id}")
         info = self.query_one(f"#{message.control_id}", InfoPanel)
         info.loading = True
         info.selected = message.selected_content

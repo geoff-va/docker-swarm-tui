@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.reactive import reactive
 from textual.widgets import TabbedContent, TextArea
 
@@ -18,8 +19,11 @@ class Nodes(NavigablePanel):
     BORDER_TITLE = "Nodes"
 
     BINDINGS = [
-        ("w", "worker", "Worker Token"),
-        ("m", "manager", "Manger Token"),
+        Binding("w", "worker", "Worker Token"),
+        Binding("m", "manager", "Manger Token"),
+        Binding("p", "promote", "Promote Node"),
+        Binding("r", "remove", "Remove Node"),
+        Binding("R", "force_remove", "Force Remove Node", show=False),
     ]
 
     data: reactive[list[Node]] = reactive([])
@@ -38,6 +42,48 @@ class Nodes(NavigablePanel):
         for row in rows:
             self.table.add_row(row.hostname, key=row.id)
         self.table.sort("Name", key=lambda x: x.lower())
+
+    async def action_remove(self) -> None:
+        try:
+            await self.remove_highlighted_node(force=False)
+        except DockerApiError as e:
+            self.notify(str(e), title="Remove Node Failed", severity="error")
+
+    async def action_force_remove(self) -> None:
+        try:
+            await self.remove_highlighted_node(force=True)
+        except DockerApiError as e:
+            self.notify(str(e), title="Remove Node (force) Failed", severity="error")
+
+    async def remove_highlighted_node(self, force: bool = False) -> None:
+        # TODO: will need to refresh nodes or monitor events looking for node removal
+        cell = self.table.coordinate_to_cell_key(self.table.cursor_coordinate)
+        assert cell.row_key.value
+        node_id = cell.row_key.value
+        hostname = self.table.get_cell_at(self.table.cursor_coordinate)
+        await self.backend.remove_node(node_id, force=force)
+        title = "Node Removed (force)" if force else "Node Removed"
+        self.notify(
+            message=f"Removed: {hostname} ({node_id})",
+            title=title,
+            severity="information",
+        )
+
+    async def action_worker(self) -> None:
+        # TODO: Create model for user to copy join token/command
+        try:
+            token = await self.backend.get_worker_token()
+            self.notify(message=token, title="Worker Token", severity="information")
+        except DockerApiError as e:
+            self.notify(str(e), title="Worker Token Error", severity="error")
+
+    async def action_manager(self) -> None:
+        # TODO: Create model for user to copy join token/command
+        try:
+            token = await self.backend.get_manager_token()
+            self.notify(message=token, title="Manager Token", severity="information")
+        except DockerApiError as e:
+            self.notify(str(e), title="Manager Token Error", severity="error")
 
 
 class NodeInfo(InfoPanel):

@@ -47,3 +47,15 @@ ContentSwitcher {
 	height: 1fr;
 }
 
+Swarm {
+	height: 3;
+	border: round $primary;
+}
+Swarm FocusedLabel {
+	padding-left: 1;
+}
+
+Swarm:focus-within {
+	border: round $secondary;
+ }
+

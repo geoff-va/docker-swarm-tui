@@ -1,13 +1,17 @@
 from textual.widgets import Static
 
+from ..backends.base import BaseBackend
 from .datatable_nav import SelectionChanged
 
 
 class NavigablePanel(Static):
     """Panel that has an integer identifier and be emit a SelectionChanged message"""
 
-    def __init__(self, num: int, control_id: str, *args, **kwargs) -> None:
+    def __init__(
+        self, backend: BaseBackend, num: int, control_id: str, *args, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
+        self.backend = backend
         self._control_id = control_id
         if self.BORDER_TITLE:
             self.border_title = f"[{num}] {self.BORDER_TITLE}"

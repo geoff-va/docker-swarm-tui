@@ -144,3 +144,25 @@ class AioDockerBackend(BaseBackend):
     @docker_exc_wrapper
     async def get_node_tasks(self, node_id: str) -> list[dict[str, Any]]:
         return []
+
+    async def promote_node(self, node_id: str) -> dict[str, Any]:
+        # Get current version of node from nodes endpoint
+        # do a node update command with the version and role
+
+        return {}
+
+    async def demote_note(self, node_id: str) -> dict[str, Any]:
+        # Get current version of node from nodes endpoint
+        # do a node update command with the version and role
+        return {}
+
+    async def remove_node(self, node_id: str, force: bool = False) -> dict[str, Any]:
+        return dict(await self.docker.nodes.remove(node_id=node_id, force=force))
+
+    async def get_worker_token(self) -> str:
+        result = await self.docker.swarm.inspect()
+        return result["JoinTokens"]["Worker"]
+
+    async def get_manager_token(self) -> str:
+        result = await self.docker.swarm.inspect()
+        return result["JoinTokens"]["Manager"]
