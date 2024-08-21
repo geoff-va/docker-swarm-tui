@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from textual import work
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import TabbedContent, TextArea
@@ -22,8 +23,6 @@ class Secrets(NavigablePanel):
         ("r", "rename", "Rename"),
     ]
 
-    data: reactive[list[str]] = reactive([])
-
     def compose(self) -> ComposeResult:
         self.table = DataTableNav(id="secrets-dt", filter_field="Name")
         self.table.show_header = False
@@ -33,7 +32,20 @@ class Secrets(NavigablePanel):
     def focus_child(self) -> None:
         self.table.focus()
 
-    def watch_data(self, rows: list[str]) -> None:
+    async def action_delete(self) -> None:
+        if not self.table.is_valid_coordinate(self.table.cursor_coordinate):
+            return
+
+        cell = self.table.coordinate_to_cell_key(self.table.cursor_coordinate)
+        try:
+            await self.backend.remove_secret(cell.row_key.value)
+            self.notify(f"Removed Secret: {cell.row_key.value}", title="Secrets")
+            await self.reload_table()
+        except DockerApiError as e:
+            self.notify(str(e), title="Secrets", severity="error")
+
+    async def reload_table(self) -> None:
+        rows = await self.backend.get_secrets()
         self.table.clear()
         for row in rows:
             self.table.add_row(row, key=row)
@@ -51,7 +63,7 @@ class SecretsInfo(InfoPanel):
             yield self.component
 
     async def watch_selected(self, selected: SelectedContent) -> None:
-        if not selected:
+        if selected is None:
             return
         try:
             self.query_one(

@@ -99,11 +99,7 @@ class SwarmTui(App):
 
     @work
     async def load_secrets(self) -> None:
-        try:
-            self.query_one(Secrets).data = await self.backend.get_secrets()
-        except DockerApiError as e:
-            self.notify(title="Error loading secrets", message=str(e), severity="error")
-            self.query_one(Secrets).data = []
+        await self.query_one(Secrets).reload_table()
 
     @work
     async def load_nodes(self) -> None:

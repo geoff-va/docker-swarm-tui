@@ -50,6 +50,12 @@ class AioDockerBackend(BaseBackend):
         return dict(await self.docker.secrets.inspect(secret_id))
 
     @docker_exc_wrapper
+    async def remove_secret(self, secret_id: str) -> dict[str, Any]:
+        removed = await self.docker.secrets.delete(secret_id)
+        if not removed:
+            raise DockerApiError(f"Failed to remove secret: {secret_id}")
+
+    @docker_exc_wrapper
     async def get_configs(self) -> list[str]:
         result = await self.docker.configs.list()
         return [item["Spec"]["Name"] for item in result]
