@@ -15,9 +15,9 @@ from .base import BaseBackend
 def docker_exc_wrapper(func):
     """Re-Raise DockerError as our DockerApiError"""
 
-    def _inner(*args, **kwargs):
+    async def _inner(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except DockerError as e:
             raise DockerApiError(e)
 
@@ -46,14 +46,22 @@ class AioDockerBackend(BaseBackend):
         return [item["Spec"]["Name"] for item in result]
 
     @docker_exc_wrapper
+    async def update_secret(
+        self,
+        secret_id: str,
+        labels: dict[str, str] | None = None,
+    ) -> bool:
+        info = await self.get_secret_info(secret_id)
+        version = info["Version"]["Index"]
+        return await self.docker.secrets.update(secret_id, version, labels=labels)
+
+    @docker_exc_wrapper
     async def get_secret_info(self, secret_id: str) -> dict[str, Any]:
         return dict(await self.docker.secrets.inspect(secret_id))
 
     @docker_exc_wrapper
-    async def remove_secret(self, secret_id: str) -> dict[str, Any]:
-        removed = await self.docker.secrets.delete(secret_id)
-        if not removed:
-            raise DockerApiError(f"Failed to remove secret: {secret_id}")
+    async def remove_secret(self, secret_id: str) -> bool:
+        return await self.docker.secrets.delete(secret_id)
 
     @docker_exc_wrapper
     async def get_configs(self) -> list[str]:
