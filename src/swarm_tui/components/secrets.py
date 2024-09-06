@@ -20,7 +20,7 @@ class Secrets(NavigablePanel):
     BINDINGS = [
         ("a", "add", "Add"),
         ("d", "delete", "Delete"),
-        ("r", "rename", "Rename"),
+        ("e", "edit", "Edit"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -37,10 +37,35 @@ class Secrets(NavigablePanel):
             return
 
         cell = self.table.coordinate_to_cell_key(self.table.cursor_coordinate)
+        secret_name = cell.row_key.value
         try:
-            await self.backend.remove_secret(cell.row_key.value)
-            self.notify(f"Removed Secret: {cell.row_key.value}", title="Secrets")
-            await self.reload_table()
+            removed = await self.backend.remove_secret(secret_name)
+            if removed:
+                self.notify(f"Removed Secret: {secret_name}", title="Secrets")
+                await self.reload_table()
+            else:
+                self.notify(
+                    f"Failed to remove secret: {secret_name}",
+                    title="Secrets",
+                    severity="error",
+                )
+
+        except DockerApiError as e:
+            self.notify(str(e), title="Secrets", severity="error")
+
+    async def action_edit(self) -> None:
+        if not self.table.is_valid_coordinate(self.table.cursor_coordinate):
+            return
+
+        cell = self.table.coordinate_to_cell_key(self.table.cursor_coordinate)
+        secret_name = cell.row_key.value
+        # TODO: Add screen to edit labels
+        try:
+            result = await self.backend.update_secret(
+                secret_name, labels={"foo": "bar"}
+            )
+            self.notify("Updated secret labels to foo: bar", title="Secrets")
+            # TODO: reload the currently selected secret
         except DockerApiError as e:
             self.notify(str(e), title="Secrets", severity="error")
 
