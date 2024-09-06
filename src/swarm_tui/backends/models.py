@@ -35,8 +35,8 @@ class TaskState(Enum):
 
 @dataclass
 class Secret:
+    id: str
     name: str
-    data: str
 
 
 @dataclass
