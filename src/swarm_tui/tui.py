@@ -93,6 +93,9 @@ class SwarmTui(App):
     async def subscribe_to_events(self):
         self.subscriber = self.backend.get_event_subscriber()
         # TODO: Should probably implement some kind of stop mechanism
+        # NOTE: This can result in double refreshes from something like secrets
+        # since that also refreshes the tabel on change internally
+        # TODO: Could only refresh from docker events? Then how do fakes work though..
         while True:
             event = await self.subscriber.get()
             self.log.debug(f"Docker Event: {event}")
