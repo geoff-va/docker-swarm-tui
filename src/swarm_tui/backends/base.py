@@ -5,6 +5,12 @@ from typing import Any, Literal
 from . import models
 
 
+class EventStream:
+    def __init__(self) -> None: ...
+
+    async def get(self) -> dict[str, Any]: ...
+
+
 class BaseBackend:
     """Base class for backends"""
 
@@ -57,3 +63,5 @@ class BaseBackend:
     async def get_node_join_cmd(
         self, node_type: Literal["worker", "manager"]
     ) -> str: ...
+
+    def get_event_subscriber(self) -> EventStream: ...

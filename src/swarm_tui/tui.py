@@ -1,7 +1,7 @@
 import logging
 
 from aiodocker import Docker
-from textual import work
+from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
@@ -80,6 +80,7 @@ class SwarmTui(App):
 
     def on_mount(self) -> None:
         self.refresh_all()
+        self.subscribe_to_events()
 
     def refresh_all(self) -> None:
         self.load_swarm_info()
@@ -87,6 +88,20 @@ class SwarmTui(App):
         self.load_nodes()
         self.load_configs()
         self.load_stacks_and_services()
+
+    @work
+    async def subscribe_to_events(self):
+        self.subscriber = self.backend.get_event_subscriber()
+        # TODO: Should probably implement some kind of stop mechanism
+        while True:
+            event = await self.subscriber.get()
+            self.log.debug(f"Docker Event: {event}")
+            if event["Type"] == "secret":
+                self.load_secrets()
+            elif event["Type"] == "config":
+                self.load_configs()
+            elif event["Type"] == "container":
+                self.load_stacks_and_services()
 
     @work
     async def load_swarm_info(self) -> None:

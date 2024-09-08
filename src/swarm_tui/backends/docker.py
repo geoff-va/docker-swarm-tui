@@ -4,12 +4,13 @@ import base64
 from typing import Any, Literal
 
 import aiodocker
+from aiodocker.channel import ChannelSubscriber
 from aiodocker.exceptions import DockerError
 from textual import log
 
 from ..exceptions import DockerApiError
 from . import models
-from .base import BaseBackend
+from .base import BaseBackend, EventStream
 
 
 def docker_exc_wrapper(func):
@@ -22,6 +23,14 @@ def docker_exc_wrapper(func):
             raise DockerApiError(e)
 
     return _inner
+
+
+class DockerEventStream(EventStream):
+    def __init__(self, subscriber: ChannelSubscriber) -> None:
+        self.subscriber = subscriber
+
+    async def get(self) -> dict[str, Any]:
+        return await self.subscriber.get()
 
 
 class AioDockerBackend(BaseBackend):
@@ -211,3 +220,6 @@ class AioDockerBackend(BaseBackend):
                 return node
 
         raise DockerApiError("No reachable managers found")
+
+    def get_event_subscriber(self) -> DockerEventStream:
+        return DockerEventStream(self.docker.events.subscribe())
